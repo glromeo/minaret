@@ -93,12 +93,13 @@ cd monitoring && npm ci && npm run build     # -> broker/wwwroot/monitor/
 ```
 
 Run long-lived processes from the IDE, not from a shell: `io.minaret.broker.Application` with `broker/`
-as working directory, then the examples' `Main` with `--provider` / `--client`.
+as working directory, then the examples' `Main` with `--provider` / `--client`, or
+`io.minaret.benchmark.Main`.
 
 ### IDE import
 
 IntelliJ's Maven importer only reads `pom.xml`, so generate one per POM (gitignored, not the source of
-truth; regenerate after editing a `pom.yml`), from the root and from each module directory:
+truth). After editing any `pom.yml`, refresh them all with one run from the root; it covers every module:
 
 ```
 mvn io.takari.polyglot:polyglot-translate-plugin:translate -Dinput=pom.yml -Doutput=pom.xml
