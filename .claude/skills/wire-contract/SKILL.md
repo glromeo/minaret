@@ -5,16 +5,17 @@ description: The shared client/server wire contract - Message and Header field-b
 
 # Shared wire contract
 
-The types both ends depend on. In this repo they are written **twice in Java**, and nothing compares
-the two vocabularies directly:
+The types both ends depend on. In this repo they are written **twice in Java**:
 - `runtime/src/main/java/io/minaret/messaging/` — `Header`, `Message`, `Destination`, `Verbs`,
   `Events`, `CloseCodes`, `ControlBodies`, `ClientInfo` (Jackson);
 - `broker/src/main/java/io/minaret/broker/contract/` — `Verbs`, `EventNames`, `CloseCodes`,
   `EventFilter`, `Contract` (Micronaut Serde, compile-time `@Serdeable`), with the header parsed in
   place by `broker/.../wire/Frame` rather than into a record.
 
-They are kept identical by hand. The cross-check is that broker tests build and read every frame with
-runtime's codec (`TestBus`, `e2e/`), so a drifted verb or field fails there. A third copy is
+They are kept identical by hand and pinned by `broker/.../contract/ContractParityTest`, which compares
+`Verbs`, event names and `CloseCodes` constant by constant, and each shared body's record components (its
+JSON properties). Pair a new body there when you add one. Broker tests also build and read every frame
+with runtime's codec (`TestBus`, `e2e/`). A third copy is
 `javascript/src/messaging/` (`verbs.js`, `events.js`, `connection.js`'s `CloseCodes`). The old C#
 `Runtime/Messaging` is a fourth peer during migration. Adding a verb, event name or field means all of
 them.

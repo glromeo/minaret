@@ -151,8 +151,10 @@ exist on **both** handles: `proxy` is always "what I send", `bind` always "what 
   invokes a listener. Handlers are *invoked* from that thread, but their futures are never joined on
   it, or a handler issuing a request would deadlock the queue against its own reply.
 - **The transport stitches text fragments itself.** `java.net.http.WebSocket` delivers `CharSequence`
-  with an `isLast` flag. There is no relay path and no pooling, because a client is always its body's
-  consumer.
+  with an `isLast` flag. There is no relay path and no buffer pooling, because a client is always its
+  body's consumer. The exception is `wire/Gzip`, which pools Deflaters/Inflaters: built per message,
+  each one goes through the JDK Cleaner's single global lock, and 2000 Routers in one process
+  serialized on it.
 - **Sends are chained through one future.** `WebSocket.sendText` must not be called again before the
   previous send completes. Without the chain, two threads publishing at once is an
   `IllegalStateException` from the JDK.

@@ -6,14 +6,15 @@ version: 0.1.0-SNAPSHOT
 packaging: pom
 
 name: "Minaret"
-description: >
-  A message bus: the broker, the Java client runtime and runnable examples, built as one reactor.
+description:
+  A message bus the broker, the Java client runtime and runnable examples, built as one reactor.
 
 # broker is a module but not a child: it inherits from micronaut-parent, and a POM has one parent.
 modules:
   - runtime
   - broker
   - examples
+  - benchmark
 
 properties:
   project.build.sourceEncoding: UTF-8

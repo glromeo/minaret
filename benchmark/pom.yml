@@ -1,0 +1,26 @@
+modelVersion: 4.0.0
+
+parent:
+  groupId: io.minaret
+  artifactId: minaret
+  version: 0.1.0-SNAPSHOT
+  relativePath: ../pom.yml
+
+artifactId: benchmark
+packaging: jar
+
+name: "Minaret :: Benchmark"
+description: >
+  Load generator run against a live broker: point-to-point request/reply (dispatch) or one provider
+  publishing to N subscribers (fanout).
+
+properties:
+  exec.mainClass: io.minaret.benchmark.Main
+
+dependencies:
+  - groupId: io.minaret
+    artifactId: runtime
+
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test

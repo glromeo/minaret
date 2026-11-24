@@ -18,7 +18,9 @@ Each implementation has a test pinning the same literals, which is what turns "w
 something checkable. A change to framing or field order lands in all of them:
 
 - **`runtime/.../messaging/wire/Wire.java`**, text-only. A client never relays a body it doesn't
-  consume, and a WebSocket delivers whole messages, so there is no byte path and no pooling.
+  consume, and a WebSocket delivers whole messages, so there is no byte path and no buffer pooling.
+  The one pool is `Gzip`'s Deflaters/Inflaters, which a per-message `GZIP*Stream` would build and
+  clean through the JDK's globally locked Cleaner.
   `parseHeader(String)` answers a `WireFrame` (or an error); `parseBody`/`parseBodyAsJson`/`parseBodyAs`
   decode the body; `prepareBody` serializes and decides compression; `serializeText` /
   `serializeMessage` originate a frame. Pinned by `runtime/.../wire/WireTest`.

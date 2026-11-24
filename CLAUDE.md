@@ -41,7 +41,8 @@ strings that cross the wire still say `messagebus`; Java packages are `io.minare
 ## Where the detail lives
 
 - **`wire-contract` skill**: the client/broker contract (`Header`, `Message`, `Destination`, `Verbs`,
-  `Events`, `CloseCodes`), written once in `runtime` and once in `broker/.../contract`. Read it before
+  `Events`, `CloseCodes`), written once in `runtime` and once in `broker/.../contract`, pinned together
+  by `ContractParityTest`. Read it before
   adding a header field, verb or event name, or touching topic addressing.
 - **`wire-protocol` skill**: the `M01` codec carrying all of the above, and the four places it is
   implemented.
@@ -60,6 +61,8 @@ strings that cross the wire still say `messagebus`; Java packages are `io.minare
 - `examples/layer0`, `examples/layer1`: runnable echo round trips. `layer0` addresses the provider by a
   hardcoded RouteId; `layer1` claims and resolves a channel *name*. Each `Main` takes `--provider` or
   `--client`.
+- `benchmark/`: load generator run against a **live** broker; its two modes don't compare (see
+  `benchmark/CLAUDE.md`).
 - `javascript/`: `@messagebus/client`, the JS client runtime (npm, no build step), for Node and the
   browser. One of the places the protocol is written, so a framing change lands here too, and
   `test/wire.test.js` pins the same literals the Java `WireTest`s pin.

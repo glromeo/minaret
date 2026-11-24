@@ -11,6 +11,9 @@ pom.xml
 *.iml
 
 node_modules/
+
+# The benchmark's results log: one row per run, machine-specific, appended to on every run.
+benchmark-results.csv
 *.tsbuildinfo
 
 # monitoring's Vite build output: `npm run build` renders this whole directory, so it is generated

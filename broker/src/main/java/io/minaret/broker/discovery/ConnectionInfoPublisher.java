@@ -74,7 +74,7 @@ public final class ConnectionInfoPublisher implements ApplicationEventListener<S
         loop = new Thread(() -> serve(payload), "messagebus-discovery");
         loop.setDaemon(true);
         loop.start();
-        log.info("Publishing port {} on \\\\.\\pipe\\{}", event.getSource().getPort(), pipeName);
+        log.info("Publishing port {} on {}", event.getSource().getPort(), path());
     }
 
     /** One client per iteration: wait, write, flush (blocks until it is read), disconnect, repeat. */

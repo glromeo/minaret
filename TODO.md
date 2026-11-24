@@ -38,12 +38,6 @@ is not recorded here; that is what `git log` and the `CLAUDE.md` files are for.
 
 ## Found during the move off C#
 
-- [ ] **The contract is written twice in Java and nothing compares the copies.**
-      `runtime/.../messaging/{Verbs,Events,CloseCodes}` and `broker/.../contract/{Verbs,EventNames,
-      CloseCodes}` are kept identical by hand. The broker's tests already have `runtime` on the
-      classpath, so a parity test comparing the constant sets reflectively costs a few lines and turns
-      drift into a failure.
-
 - [ ] **The runtime's request/reply correlator is written three times**: `ChannelBase.awaitAck`,
       `ChannelBase.callOnTopic`, `Router.sendSubscribe`. Collapse them into one predicate-taking
       `Router.awaitReply`, as the C# runtime did with `AwaitReply`.

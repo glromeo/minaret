@@ -5,14 +5,10 @@ import io.minaret.messaging.Destination;
 import io.minaret.messaging.Header;
 import io.minaret.util.Json;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 
 /**
  * The M01 wire protocol codec: M01|to|type|time|ttl|from|replyTo|enc|bodyLength[|extras...]\0body — a
@@ -149,8 +145,8 @@ public final class Wire {
         if (frame.header().encoding() != BodyEncoding.GZIP) return body;
 
         try {
-            return gunzip(BASE64URL_DECODER.decode(body));
-        } catch (IllegalArgumentException | IOException e) {
+            return Gzip.decompressUtf8(BASE64URL_DECODER.decode(body));
+        } catch (IllegalArgumentException | ZipException e) {
             return "";
         }
     }
@@ -191,7 +187,7 @@ public final class Wire {
         if (bytes.length < COMPRESSION_THRESHOLD_BYTES)
             return new Prepared(header.withBody(BodyEncoding.RAW, bytes.length), json);
 
-        String compressed = BASE64URL.encodeToString(gzip(bytes));
+        String compressed = BASE64URL.encodeToString(Gzip.compress(bytes));
         // The length stamped is the compressed body's own byte count, matching what C# stamps for a
         // compressed body — base64url is ASCII, so its char count is its byte count.
         return new Prepared(header.withBody(BodyEncoding.GZIP, compressed.length()), compressed);
@@ -212,7 +208,7 @@ public final class Wire {
         if (bytes.length < COMPRESSION_THRESHOLD_BYTES)
             return writeHeaderAndBody(header.withBody(BodyEncoding.RAW, bytes.length), body);
 
-        String compressed = BASE64URL.encodeToString(gzip(bytes));
+        String compressed = BASE64URL.encodeToString(Gzip.compress(bytes));
         return writeHeaderAndBody(header.withBody(BodyEncoding.GZIP, compressed.length()), compressed);
     }
 
@@ -377,23 +373,6 @@ public final class Wire {
             return Integer.valueOf(segment);
         } catch (NumberFormatException e) {
             throw new MalformedField("malformed body length");
-        }
-    }
-
-    private static byte[] gzip(byte[] plain) {
-        ByteArrayOutputStream target = new ByteArrayOutputStream(Math.max(32, plain.length / 3));
-        try (GZIPOutputStream out = new GZIPOutputStream(target)) {
-            out.write(plain);
-        } catch (IOException e) {
-            throw new IllegalStateException("gzip failed over an in-memory buffer", e);
-        }
-
-        return target.toByteArray();
-    }
-
-    private static String gunzip(byte[] compressed) throws IOException {
-        try (GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(compressed))) {
-            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 

@@ -25,6 +25,18 @@ public final class Channels implements AutoCloseable {
     }
 
     /**
+     * The channel surface over a Router the caller built and connected itself, for when connect's
+     * defaults don't fit.
+     *
+     * The benchmark's workers use it. They share a few HttpClients across thousands of connections
+     * (each HttpClient runs its own selector thread), and they need a failed connect to surface rather
+     * than retry forever under connect's reconnect policy.
+     */
+    public static Channels over(Router router) {
+        return new Channels(router);
+    }
+
+    /**
      * The channel a type declares, or throws if it declares none. Read from the runtime type so a
      * subclass of an annotated class still resolves.
      */
