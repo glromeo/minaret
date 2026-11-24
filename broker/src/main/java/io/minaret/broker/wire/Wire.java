@@ -3,7 +3,7 @@ package io.minaret.broker.wire;
 import java.nio.charset.StandardCharsets;
 
 /**
- * The M01 constants, as Runtime/Messaging/Utils/Wire.cs declares them. The frame is
+ * The M01 constants. The frame is
  * M01|to|type|time|ttl|from|replyTo|enc|bodyLength[|extras...]\0body; field-by-field rules live on
  * Frame (read) and FrameWriter (write), the rationale in the wire-protocol skill.
  */
@@ -19,7 +19,7 @@ public final class Wire {
     /** Compared against the *uncompressed* body size, never the compressed output. */
     public static final int COMPRESSION_THRESHOLD_BYTES = 1024;
 
-    /** A header longer than this ends the connection rather than dropping the frame, as in C#. */
+    /** A header longer than this ends the connection rather than dropping the frame. */
     public static final int MAX_HEADER_BYTES = 8 * 1024;
 
     public static final int MAX_BODY_BYTES = 8 * 1024 * 1024;

@@ -7,7 +7,7 @@ import { Verbs } from "../src/messaging/verbs.js";
 
 /**
  * A hand-rolled Connection standing in for the Broker, following the repo's fakes-over-mocks
- * convention and Runtime.Tests/Messaging/FakeConnection.cs in particular.
+ * convention and runtime's FakeConnection in particular.
  *
  * Like that one it **auto-acks the register handshake**, since Router.connectTo does not return
  * until the ack lands — and, crucially, it acks from a *later turn* rather than inline on the send.

@@ -1,7 +1,7 @@
 package io.minaret.broker.contract;
 
 /**
- * Runtime/Messaging/Events.cs's EventNames. Strings, unlike Verbs: they appear only inside JSON
+ * The event names. Strings, unlike Verbs: they appear only inside JSON
  * bodies (an event's name, an event.subscribe's name), never as a frame's type.
  */
 public final class EventNames {

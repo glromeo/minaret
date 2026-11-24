@@ -22,7 +22,7 @@ micronaut:
         paths: file:wwwroot
   serde:
     serialization:
-      # Null members are written, so acks carry every field and read the same as the C# Broker's.
+      # Null members are written, so acks carry every field.
       inclusion: always
 
 messagebus:

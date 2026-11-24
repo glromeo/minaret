@@ -6,12 +6,12 @@ import { prepareBody, serializeMessage, tryParseBody, tryParseHeader } from "../
 import { Verbs } from "../src/messaging/verbs.js";
 
 /**
- * The codec's cross-language obligations. What is pinned here is deliberately what the C# WireTests
- * pins — the same Guid literal, the same field order, the same treatment of an absent field — since
+ * The codec's cross-language obligations. What is pinned here is deliberately what the Java WireTests
+ * pin — the same Guid literal, the same field order, the same treatment of an absent field — since
  * a JS-only assertion proves the port self-consistent without proving it agrees with anything.
  */
 
-test("Guid encodes as base64url of its bytes in big-endian order, the literal C# pins", () => {
+test("Guid encodes as base64url of its bytes in big-endian order, the literal the Java tests pin", () => {
     assert.equal(encodeGuid("00112233-4455-6677-8899-aabbccddeeff"), "ABEiM0RVZneImaq7zN3u_w");
     assert.equal(decodeGuid("ABEiM0RVZneImaq7zN3u_w"), "00112233-4455-6677-8899-aabbccddeeff");
 });

@@ -36,26 +36,19 @@ is not recorded here; that is what `git log` and the `CLAUDE.md` files are for.
       correlation lookup (infinite echo loop, pinned by
       `RoutingTest.dispatch_providerReply_goesToTheAwaitingClient_notBackToTheProvider`).
 
-## Found during the move off C#
+## Cleanup
 
 - [ ] **The runtime's request/reply correlator is written three times**: `ChannelBase.awaitAck`,
       `ChannelBase.callOnTopic`, `Router.sendSubscribe`. Collapse them into one predicate-taking
-      `Router.awaitReply`, as the C# runtime did with `AwaitReply`.
+      `Router.awaitReply`.
 
-- [ ] **Doc prose still compares to C#.** About 140 lines across `runtime/src` and `broker/src` ("the port
-      of C#'s X", "C# does Y"), and the JS module headers ("mirrors Runtime/X.cs"). The pointers that
-      would dangle are fixed. What's left is wording that reads as history once the C# side is retired.
-      Rewrite them when that happens, not before: while the C# Broker is a live peer, "same as C#" is
-      still a statement about interop.
-
-- [ ] **Quirks kept for parity with the C# Broker** (`broker/CLAUDE.md`): the
+- [ ] **Known broker quirks** (`broker/CLAUDE.md`): the
       `broker.connections.active` drift on supersede, the repeated `channel.registered` on a same-route
-      re-register, a `dispatch` with no `replyTo` forwarded uncorrelated. Fix them once parity stops
-      mattering.
+      re-register, a `dispatch` with no `replyTo` forwarded uncorrelated.
 
 - [ ] **Brand names on the wire.** The pipe `MessageBus.Broker.ConnectionInfo.<REALM>`,
-      `MESSAGEBUS_REALM`, the `messagebus.*` config keys and `@messagebus/client` were kept so the C#
-      and current JS clients interoperate. Renaming any of them is a coordinated change across every
+      `MESSAGEBUS_REALM`, the `messagebus.*` config keys and `@messagebus/client` are shared by every
+      client. Renaming any of them is a coordinated change across every
       implementation.
 
 ## Cross-runtime parity
@@ -71,8 +64,7 @@ is not recorded here; that is what `git log` and the `CLAUDE.md` files are for.
       `.idl`. What exists is the authoring half: `monitoring/src/idl/` (grammar, completion engine,
       editor) and `broker/.../idl/` (the REST repository that stores what it writes). The two open
       pieces are the **extractor** (annotated `@Channel` types → `.idl`) and the
-      **generator/validator** (`.idl` → stubs, and checking a live channel against its contract). The
-      C# prototype's pipeline (`attic/`, `SALVAGE.md` in the old MessageBus repo) is the reference.
+      **generator/validator** (`.idl` → stubs, and checking a live channel against its contract).
 
 - [ ] **The broker validates only an `.idl`'s envelope** (`IdlValidator`: an array of channels each with
       a `name` and `topics`), because the grammar itself is written once, in TypeScript

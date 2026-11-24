@@ -84,5 +84,4 @@ Every module mirrors its counterpart in the Java `runtime` (under
 `src/utils/logger.js` and `src/utils/async.js` have no counterpart: Java uses `System.Logger` and
 `CompletableFuture`.
 
-`CLAUDE.md` records what this port does differently from the reference client, and why. That list was
-written against the C# `Runtime` this package was first ported from.
+`CLAUDE.md` records what this port does differently from `runtime/`, and why.

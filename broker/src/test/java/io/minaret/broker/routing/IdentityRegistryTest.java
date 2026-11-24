@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/** The port of Broker.Tests' IdentityRegistryTests. */
+/** IdentityRegistry. */
 class IdentityRegistryTest {
 
     private static Uuid newId() {

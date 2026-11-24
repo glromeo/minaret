@@ -14,7 +14,7 @@
  * unreachable.
  */
 
-/** One row of the listing, and also what a write answers with — see `IdlEntry` on the C# side. */
+/** One row of the listing, and also what a write answers with — see broker's IdlRepository.Entry. */
 export interface IdlEntry {
     name: string;
     etag: string;

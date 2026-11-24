@@ -9,8 +9,7 @@ import java.util.UUID;
  * Wire bodies for the Layer-1 channel/topic control messages, all Broker-addressed — symmetric with the
  * register/registered handshake Router already uses.
  *
- * On the C# side these are declared records in Channels.cs because the Broker shares that file. Nothing
- * is shared across the language boundary here except the JSON, so they are gathered into one holder
+ * Nothing is shared with the Broker but the JSON, so they are gathered into one holder
  * rather than scattered as top-level types nothing else references.
  */
 public final class ControlBodies {

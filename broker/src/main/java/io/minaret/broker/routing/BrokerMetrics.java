@@ -9,9 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The C# BrokerMetrics instruments under the same names, over Micrometer. No exporter is configured
- * here: adding a micronaut-micrometer-registry-* module is what publishes them, just as the C# meter
- * emits to whatever listener is attached.
+ * The Broker's instruments, over Micrometer. No exporter is configured here: adding a
+ * micronaut-micrometer-registry-* module is what publishes them.
  *
  * Every drop reason has its own pre-built Counter (Drop), so counting a drop on the hot path is one
  * increment with no tag lookup and no Meter.Id allocation.
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Singleton
 public final class BrokerMetrics {
 
-    /** The broker.messages.dropped reasons, exactly the C# strings. */
+    /** The broker.messages.dropped reasons. */
     public enum Drop {
         MALFORMED("malformed"),
         UNKNOWN_TYPE("unknown-type"),

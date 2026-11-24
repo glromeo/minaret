@@ -3,12 +3,12 @@ package io.minaret.broker.routing;
 import io.minaret.broker.wire.Frame;
 
 /**
- * C#'s BrokerPolicy.Resolve: how long a frame may live, and when it was sent, resolved once per
+ * The Broker's policy: how long a frame may live, and when it was sent, resolved once per
  * data-plane frame. The rationale is in CLAUDE.md "BrokerPolicy".
  *
  * A mutable struct rather than a returned tuple. Session owns one and reads ttl, time and expired
- * straight after resolve, so the resolution allocates nothing. The From re-stamp that C# also does
- * here is Session's: it is just "the sender's RouteId", which Session already holds.
+ * straight after resolve, so the resolution allocates nothing. The From re-stamp is not here but
+ * Session's: it is just "the sender's RouteId", which Session already holds.
  */
 final class Policy {
 

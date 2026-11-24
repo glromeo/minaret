@@ -16,7 +16,7 @@ import java.nio.file.NoSuchFileException;
  * which is the same escape hatch a container deployment would need regardless.
  *
  * The pipe name is realm-scoped so several realms can coexist on one machine without colliding on a
- * single well-known name. Uppercasing matches the C# publisher exactly; no other normalization is
+ * single well-known name. Uppercasing matches the Broker's publisher exactly; no other normalization is
  * applied, so the two sides must agree on the realm value case-insensitively.
  */
 public final class BrokerDiscovery {

@@ -6,9 +6,8 @@ handles and the transport is written there and is **not** repeated here. The sha
 the `wire-contract` skill; the codec is the `wire-protocol` skill. This file covers only what is local
 to this package.
 
-`README.md` has the module-for-module map to `runtime/` and the usage surface. The package was first
-ported from the C# `Runtime`, and its module doc blocks still name the `.cs` file each mirrors. Read
-those as pointing at the same-named Java type in `runtime/`.
+`README.md` has the module-for-module map to `runtime/` and the usage surface. Module doc blocks name
+the `runtime/` type each mirrors.
 
 ## Constraints that shaped it
 

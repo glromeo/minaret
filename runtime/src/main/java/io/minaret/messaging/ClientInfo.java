@@ -40,8 +40,8 @@ public record ClientInfo(UUID routeId, String identity, long clockOffsetMs, Map<
     }
 
     /**
-     * "{main class}@{implementation version}" as a best-effort stand-in for C#'s entry-assembly
-     * name/version — the JDK has no single equivalent, so this reads the main class out of
+     * "{main class}@{implementation version}" as a best-effort program name/version — the JDK has no
+     * single source for it, so this reads the main class out of
      * sun.java.command and the version out of this package's manifest, falling back to the process id
      * if neither is available. Coarse on purpose: it identifies "this program", not "this running
      * instance of it" — a caller running more than one logical client in one process (a demo pairing a

@@ -1,8 +1,8 @@
 package io.minaret.messaging;
 
 /**
- * WebSocket close codes the Broker uses to say why it closed a connection. Mirrors
- * {@code Runtime/Messaging/CloseCodes.cs}, which carries the full rationale.
+ * WebSocket close codes the Broker uses to say why it closed a connection. Mirrors broker's
+ * contract CloseCodes.
  *
  * Values live in the 4000-4999 application range the WebSocket spec reserves for private use, so none
  * can collide with a protocol code an intermediary might send.

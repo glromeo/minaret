@@ -20,7 +20,7 @@ import static io.minaret.broker.contract.EventNames.TOPIC_REGISTERED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The port of Broker.Tests' EventRegistryTests. C#'s FiltersFor is not ported, so its two tests pin EventFilter equality instead. */
+/** EventRegistry, and the EventFilter equality its per-route sets rely on. */
 class EventRegistryTest {
 
     private static final EventFilter ANY = new EventFilter(null, null, null);

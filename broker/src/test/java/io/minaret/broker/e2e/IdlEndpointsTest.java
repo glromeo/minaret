@@ -31,9 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The port of Broker.Tests' IdlEndpointsTests. C# builds one host per test for a fresh repository
- * directory. Here one server serves the class and the directory is emptied before each test, which
- * is equivalent because IdlRepository keeps no state outside the files.
+ * The /idl endpoints. One server serves the class and the directory is emptied before each test,
+ * which gives each test a fresh repository because IdlRepository keeps no state outside the files.
  */
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -191,7 +190,7 @@ class IdlEndpointsTest implements TestPropertyProvider {
         assertTrue(get("/idl/orders").body().contains("Submit"));
     }
 
-    /** C# sends this with no Content-Type at all (ByteArrayContent), so this does too. */
+    /** Sent with no Content-Type at all, so nothing but the bytes says it is UTF-8. */
     @Test
     void put_aDocumentSavedWithAUtf8Bom_storesTheDocumentWithoutIt() throws Exception {
         byte[] json = ONE_CHANNEL.getBytes(StandardCharsets.UTF_8);

@@ -15,8 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * event name → routeId → the set of filters that route subscribed with. A set because subscribing
  * is additive. The rationale is in CLAUDE.md "Events".
- *
- * C#'s FiltersFor is not ported: nothing in the C# Broker calls it.
  */
 @Singleton
 public final class EventRegistry {

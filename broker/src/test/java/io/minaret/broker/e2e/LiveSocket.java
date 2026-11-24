@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * A raw WebSocket to a live Broker, the Java counterpart of the ClientWebSocket MessageRoutingTests
- * drives: text frames out, whole messages in, with nothing of the client runtime in between. The
- * Java client's codec builds and reads the frames, so a mismatch shows up as a parse failure here.
+ * A raw WebSocket to a live Broker, as MessageRoutingTest drives it: text frames out, whole messages
+ * in, with nothing of the client runtime in between. The Java client's codec builds and reads the
+ * frames, so a mismatch shows up as a parse failure here.
  */
 final class LiveSocket implements AutoCloseable {
 

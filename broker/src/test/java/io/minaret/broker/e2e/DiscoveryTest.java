@@ -19,9 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * The port of BrokerConnectionInfoPublisherTests, end to end. The Java client's BrokerDiscovery reads
- * the pipe exactly as every real client does. C#'s BuildPayload tests have no counterpart: the port
- * comes from the running server, not from a Kestrel URL in configuration.
+ * ConnectionInfoPublisher end to end. The Java client's BrokerDiscovery reads the pipe exactly as
+ * every real client does. The port comes from the running server, not from configuration.
  */
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

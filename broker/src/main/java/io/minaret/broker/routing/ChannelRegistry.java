@@ -14,9 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * The channel and topic directory, the subscriber lists and the reply-correlation table: the port of
- * C#'s ChannelRegistry, with its invariants unchanged. CLAUDE.md "ChannelRegistry" is the
- * rationale.
+ * The channel and topic directory, the subscriber lists and the reply-correlation table.
+ * CLAUDE.md "ChannelRegistry" is the rationale.
  *
  * Every write takes one monitor, lock. A table is concurrent only if something reads it without the
  * lock: topics, providers (both levels), Channel.topics and pendingReplies. The rest are plain maps.
@@ -26,13 +25,12 @@ import java.util.concurrent.ConcurrentMap;
  * by every id-addressed frame. pendingReplies is a ReplyTable, so a request/reply pair allocates
  * nothing.
  *
- * C#'s subscriber map (RouteId → that route's nodes) is gone: the list hangs off the subscriber's
+ * There is no subscriber map (RouteId → that route's nodes): the list hangs off the subscriber's
  * ConnectionRegistry.Route, which each node also points at, so the fanout reads node.route.session
  * with no lookup.
  *
- * Unlike the C# original, the links the fanout walks lock-free are volatile: Topic.head,
- * SubscriptionNode.next and unlinked. .NET's memory model tolerates them being plain fields. Java's
- * does not, and without volatile a lock-free walker could observe a half-built node.
+ * The links the fanout walks lock-free are volatile: Topic.head, SubscriptionNode.next and
+ * unlinked. Without volatile a lock-free walker could observe a half-built node.
  */
 @Singleton
 public final class ChannelRegistry {
@@ -271,7 +269,6 @@ public final class ChannelRegistry {
      * subscribe and registerTopic find channel lock-free and only then take the lock, so a
      * removeChannel can run in between. Without the reference re-check, the new topic would land in
      * topics on a channel nothing will ever clean up again: an id that resolves to a dead provider.
-     * C#'s GetOrAddTopic makes the same check.
      * ChannelRegistryTest.subscribe_racingProviderDisconnect_leavesNoTopicBehind pins it.
      */
     private Topic getOrAddTopic(Channel channel, String topicName) {

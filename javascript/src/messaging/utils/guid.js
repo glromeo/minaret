@@ -2,13 +2,12 @@ import { decodeBase64Url, encodeBase64Url } from "./base64url.js";
 
 /**
  * Guid <-> base64url of the 16 raw bytes, RFC-4122 big-endian, unpadded — exactly 22 chars on the
- * wire against 36 in canonical form. Stands in for System.Guid, which the C# side gets from the BCL.
+ * wire against 36 in canonical form. Mirrors runtime's Guids.
  *
- * Big-endian is part of the wire contract, not an implementation detail: C# writes the bytes with
- * Guid.TryWriteBytes(span, bigEndian: true) rather than ToByteArray(), which is little-endian for
- * the first three fields. That form is self-consistent within C# but would not match this port.
+ * Big-endian is part of the wire contract, not an implementation detail: a little-endian layout of
+ * the first three fields would be self-consistent locally but would match no other implementation.
  *
- * Pinned by the same literal WireTests pins the C# side with:
+ * Pinned by the same literal runtime's and broker's WireTest pin:
  * 00112233-4455-6677-8899-aabbccddeeff encodes to ABEiM0RVZneImaq7zN3u_w.
  */
 
@@ -27,7 +26,7 @@ function toHyphenated(bytes) {
 }
 
 /**
- * Encodes a canonical 8-4-4-4-12 Guid, as System.Text.Json writes one, into its wire form.
+ * Encodes a canonical 8-4-4-4-12 Guid into its wire form.
  */
 export function encodeGuid(guid) {
     const hex = guid.replace(/-/g, "");
@@ -53,9 +52,8 @@ export function decodeGuid(encoded) {
 }
 
 /**
- * A fresh RouteId. Version 7 (time-ordered) to match Guid.CreateVersion7() on the C# side — nothing
- * on the wire parses the version out, but keeping the two the same means ids from either side sort
- * identically in logs.
+ * A fresh RouteId. Version 7 (time-ordered) to match the Broker's UuidV7 — nothing on the wire parses
+ * the version out, but keeping the two the same means ids from either side sort identically in logs.
  */
 export function newGuid() {
     const bytes = crypto.getRandomValues(new Uint8Array(GUID_BYTES));

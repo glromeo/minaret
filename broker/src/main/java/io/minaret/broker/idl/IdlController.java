@@ -25,11 +25,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The /idl REST surface, the port of C#'s IdlEndpoints: list, get (with If-None-Match → 304),
+ * The /idl REST surface: list, get (with If-None-Match → 304),
  * conditional put and delete.
  *
- * The status codes and the RFC 7807 problem bodies (title, detail, status, type) match ASP.NET's
- * Results.Problem, so the Monitoring API editor is unaware which Broker it is talking to.
+ * Errors answer RFC 7807 problem bodies (title, detail, status, type), which the Monitoring API
+ * editor reads.
  *
  * Runs on the blocking executor, because every handler touches the file system.
  */
@@ -48,7 +48,7 @@ public final class IdlController {
         this.validator = validator;
     }
 
-    /** ASP.NET's ProblemDetails as Results.Problem renders it. */
+    /** An RFC 7807 problem body. */
     @Serdeable
     public record Problem(String type, String title, int status, String detail) {
     }
@@ -132,7 +132,7 @@ public final class IdlController {
                 .body(new Problem(typeOf(status), title, status.getCode(), detail));
     }
 
-    /** The RFC 9110 section ASP.NET links each status to. */
+    /** The RFC 9110 section each status links to. */
     private static String typeOf(HttpStatus status) {
         String section = switch (status) {
             case BAD_REQUEST -> "15.5.1";

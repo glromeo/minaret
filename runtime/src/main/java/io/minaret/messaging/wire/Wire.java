@@ -24,9 +24,9 @@ import java.util.zip.ZipException;
  * 0". bodyLength is the one optional field: a sender that knows its exact body byte count stamps it as a
  * receive-side buffer-sizing hint, and an older sender that omits it produces an equally valid frame.
  *
- * One of four implementations of this format, with broker's Frame/FrameWriter,
- * javascript/src/messaging/utils/wire.js and the C# Wire.cs. A change here has to land in all of
- * them, and WireTest pins the same literals their tests pin — that is what turns "written four times"
+ * One of three implementations of this format, with broker's Frame/FrameWriter and
+ * javascript/src/messaging/utils/wire.js. A change here has to land in all of them, and WireTest
+ * pins the same literals their tests pin — that is what turns "written three times"
  * into something checkable. The wire-protocol skill lists them.
  */
 public final class Wire {
@@ -177,7 +177,7 @@ public final class Wire {
      * body rather than two facts to keep in step.
      *
      * bodyLength is stamped even though nothing in this runtime reads it — a WebSocket already
-     * delivers whole messages — purely so a frame from this client is byte-identical to the C# one's.
+     * delivers whole messages — purely so a frame from this client is byte-identical to the others'.
      * That is what makes the three implementations comparable at all.
      */
     public static Prepared prepareBody(Header header, Object body) {
@@ -188,8 +188,7 @@ public final class Wire {
             return new Prepared(header.withBody(BodyEncoding.RAW, bytes.length), json);
 
         String compressed = BASE64URL.encodeToString(Gzip.compress(bytes));
-        // The length stamped is the compressed body's own byte count, matching what C# stamps for a
-        // compressed body — base64url is ASCII, so its char count is its byte count.
+        // The length stamped is the compressed body's own byte count — base64url is ASCII, so its char count is its byte count.
         return new Prepared(header.withBody(BodyEncoding.GZIP, compressed.length()), compressed);
     }
 

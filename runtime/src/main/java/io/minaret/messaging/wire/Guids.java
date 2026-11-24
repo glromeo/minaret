@@ -9,12 +9,10 @@ import java.util.UUID;
  * unpadded, so exactly 22 characters instead of 36.
  *
  * This is the one place the three runtimes are easiest to get silently wrong, and the reason it is a
- * type of its own rather than two inline calls. C# must ask for big-endian explicitly, because
- * Guid.ToByteArray() is little-endian for the first three fields — self-consistent within C#, but it
- * would not match anyone else. Java needs no such correction: getMostSignificantBits/
+ * type of its own rather than two inline calls. Java needs no byte-order correction: getMostSignificantBits/
  * getLeastSignificantBits are already the RFC-4122 byte order, and ByteBuffer is big-endian by default.
  *
- * Pinned by the same literal WireTests and wire.test.js pin:
+ * Pinned by the same literal both WireTests and wire.test.js pin:
  * 00112233-4455-6677-8899-aabbccddeeff encodes to ABEiM0RVZneImaq7zN3u_w.
  */
 public final class Guids {

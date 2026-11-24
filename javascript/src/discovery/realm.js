@@ -1,6 +1,6 @@
 /**
  * A realm is an isolated named partition for discovery, so more than one independent Broker plus its
- * clients can coexist on one machine. Mirrors Runtime/Discovery/Realm.cs.
+ * clients can coexist on one machine. Mirrors runtime's Realm.
  *
  * Deliberately independent of any hosting-environment concept: a hosting environment answers "which
  * config profile is this process running under?", a realm answers "which Broker should this client

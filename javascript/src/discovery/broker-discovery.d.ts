@@ -1,5 +1,5 @@
 /**
- * The connection-discovery contract, mirroring Runtime/Discovery/BrokerConnectionInfo.cs — currently
+ * The connection-discovery contract, mirroring runtime's BrokerConnectionInfo — currently
  * just the port the Broker listens on.
  */
 export interface BrokerConnectionInfo {

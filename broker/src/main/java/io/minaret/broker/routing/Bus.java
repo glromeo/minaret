@@ -10,12 +10,11 @@ import jakarta.inject.Singleton;
 
 /**
  * Everything a Session shares with every other session. MsgbusUpgrade builds one Session per
- * connection from it, and its constructor stands in for ClientSession's C# primary constructor.
+ * connection from it.
  *
  * It also holds every open /msgbus socket in sockets, for shutdown. A WebSocket connection never
  * completes as an HTTP request would, and its pipeline no longer contains the Micronaut handlers
- * graceful shutdown waits on. Closing the sockets here is what lets the Broker stop promptly. In C#,
- * linking each session's token to ApplicationStopping does the same job.
+ * graceful shutdown waits on. Closing the sockets here is what lets the Broker stop promptly.
  */
 @Singleton
 public final class Bus {
@@ -29,7 +28,7 @@ public final class Bus {
     final ChannelGroup sockets = new DefaultChannelGroup("msgbus", GlobalEventExecutor.INSTANCE);
 
     /**
-     * BrokerAck.OK, encoded once. Session.handlePublish acks every publish, as C# does, so encoding
+     * BrokerAck.OK, encoded once. Session.handlePublish acks every publish, so encoding
      * it per frame would put a serde pass on the fanout path. AllocationTest's fanout case pins
      * that it stays off.
      */

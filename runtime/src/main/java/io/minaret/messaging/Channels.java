@@ -12,8 +12,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Convenience facade over {@link Router}: connect once, then create or connect to channels.
  *
- * The C# equivalent is called MessageBus and builds a generic host to get DI and logging. There is no
- * host here — this runtime has no DI container of its own, on purpose, because the one deployment that
+ * There is no host here — this runtime has no DI container of its own, on purpose, because the one deployment that
  * wants one (the Spring demo) already has a better one and should own the wiring itself.
  */
 public final class Channels implements AutoCloseable {
@@ -54,7 +53,7 @@ public final class Channels implements AutoCloseable {
      * client started before its Broker waits for it instead of erroring out.
      *
      * The certificate-trusting client is the default here rather than an opt-in because the Broker this
-     * is discovering is by construction on the same machine, reached over the ASP.NET development
+     * is discovering is by construction on the same machine, reached over the localhost development
      * certificate. A deployment with a real certificate should use {@link #connect(URI, ClientInfo)}
      * with a plain HttpClient.
      */

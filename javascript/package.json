@@ -1,7 +1,7 @@
 {
   "name": "@messagebus/client",
   "version": "0.1.0",
-  "description": "MessageBus client runtime for Node and the browser — the JavaScript port of the C# Runtime",
+  "description": "MessageBus client runtime for Node and the browser",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,

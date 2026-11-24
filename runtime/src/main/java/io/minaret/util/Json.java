@@ -11,18 +11,16 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.nio.charset.StandardCharsets;
 
 /**
- * The one shared JSON convention for this runtime, the counterpart of Runtime/Utils/Json.cs. It is the
+ * The one shared JSON convention for this runtime. It is the
  * body serializer (Wire goes through it) and the discovery-contract serializer; Wire owns the envelope
  * encoding, this owns the payload encoding.
  *
- * The two settings that matter are the ones that make Jackson agree with System.Text.Json as configured
- * on the C# side: property names are matched case-insensitively, and an unknown property is ignored
- * rather than fatal. The latter is not a convenience — it is what lets a newer Broker add a field to an
- * ack body without breaking every older client, which System.Text.Json gives by default and Jackson
- * does not.
+ * The two settings that matter: property names are matched case-insensitively, and an unknown
+ * property is ignored rather than fatal. The latter is not a convenience — it is what lets a newer
+ * Broker add a field to an ack body without breaking every older client, and Jackson does not do it
+ * by default.
  *
- * There is no camelCase naming strategy here even though the C# side sets one: C# property names are
- * PascalCase and need translating, Java field names are already camelCase and do not.
+ * There is no camelCase naming strategy: Java field names are already camelCase.
  */
 public final class Json {
 
@@ -73,7 +71,7 @@ public final class Json {
 
     /**
      * Converts an already-parsed tree into T — how a handler reads a body it received as a JsonNode,
-     * mirroring JsonElement.Deserialize on the C# side. Answers null rather than throwing, for the same
+     * Answers null rather than throwing, for the same
      * reason {@link #tryParse} does.
      */
     public static <T> T convert(JsonNode node, Class<T> type) {

@@ -1,11 +1,8 @@
 /**
- * A multicast callback list — what stands in for a C# `event Action<T>`, which JavaScript has no
- * language construct for. `add`/`remove` are `+=`/`-=`; `emit` is the null-conditional invoke.
+ * A multicast callback list, mirroring runtime's Emitter.
  *
- * There is no counterpart file under Runtime/: every use of this here is a place the C# side
- * declares an `event` member instead (Router.HandleMessage, IConnection.OnFrame/OnDisconnected).
- * Keeping it a small object rather than extending EventTarget preserves the two properties the C#
- * side relies on — handlers run in registration order, and synchronously — which an EventTarget's
+ * Keeping it a small object rather than extending EventTarget preserves the two properties its
+ * users rely on — handlers run in registration order, and synchronously — which an EventTarget's
  * dispatch does not promise in a form worth depending on.
  *
  * One handler throwing must not cost the others their turn (a topic handler and an ack correlator

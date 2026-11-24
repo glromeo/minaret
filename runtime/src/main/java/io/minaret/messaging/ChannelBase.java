@@ -33,7 +33,7 @@ public abstract class ChannelBase {
      * client that asked, with nothing threaded through by hand.
      *
      * A ThreadLocal, so valid only for the *synchronous* part of a handler — matching the JavaScript
-     * port's plain variable rather than C#'s AsyncLocal, which has no portable equivalent here. A
+     * client's plain variable. A
      * handler replying after an async hop must pass the header it received, which the binding layer
      * does anyway: resting a reply's correctness on where a handler yields is a poor bargain even when
      * the language would carry it.

@@ -10,10 +10,10 @@ two modes measure different broker paths and are **not comparable**:
 - `--mode=fanout`: one provider publishes `--publishes` messages on one topic to `--subscribers`,
   through `Session.handlePublish` and the topic's subscriber list. Its "messages" are deliveries. Never
   quote a fanout number without its `--subscribers`: at low counts the path is socket-bound and
-  broker-side changes are invisible. In the C# measurements they surfaced only at 2000 subscribers.
+  broker-side changes are invisible.
 
 Results print to stdout and append a row to `BENCHMARK_RESULTS` (default `benchmark-results.csv` in the
-working directory, gitignored). The columns match the C# benchmark's CSV plus `mode`.
+working directory, gitignored). Columns: see `Report`.
 
 ## What a run costs the machine
 

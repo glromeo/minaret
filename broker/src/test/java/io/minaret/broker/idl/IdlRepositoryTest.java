@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The port of Broker.Tests' IdlRepositoryTests. The repository is handed its directory directly, where C# derives it from a content root. */
+/** IdlRepository, handed its directory directly. */
 class IdlRepositoryTest {
 
     private static final String ONE_CHANNEL = "[{\"name\":\"Trading.Orders\",\"topics\":{\"submit\":{\"name\":\"Submit\",\"inbound\":{},\"outbound\":null}}}]";

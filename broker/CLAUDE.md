@@ -8,10 +8,6 @@ The broker: Micronaut 4 + raw Netty on JDK 17, serving `/msgbus` (WSS), `/idl` (
 file holds only what no single type can own: invariants two types must agree on, orderings that are
 load-bearing, and arguments that would otherwise be re-litigated.
 
-It is wire-identical to the C# Broker it was ported from (still in the old MessageBus repo), on the
-same port, realm and discovery pipe, so a C# or JS client connects unchanged. Several doc blocks still
-describe a type as "the port of C#'s X"; read that as "same design, differences listed here".
-
 ## Constraints that shaped it
 
 - **No allocation per relayed frame.** Frames are pooled direct `ByteBuf`s from socket to socket:
@@ -50,7 +46,7 @@ bytes, writes the M01 frame, then writes the unmasked `0x81` + length header in 
 body is copied once. Fanout renders once and hands each subscriber a `retainedDuplicate()`.
 
 **The keepalive** pings after 30s of reader idle and closes on the *second* idle event, so after 60s
-of silence. (The C# Broker closes after 40s.)
+of silence.
 
 ## The session
 
@@ -334,7 +330,7 @@ instead of a default every downstream party re-derives, possibly differently.
   graceful shutdown waits on. Without the close, one connected client (the monitor page holds one and
   reconnects) would hold shutdown open.
 
-## Known quirks, kept for parity with the C# Broker
+## Known quirks
 
 - `broker.connections.active` drifts upward when a session is superseded.
 - A same-route `channel.register` emits `channel.registered` again.
@@ -358,4 +354,4 @@ instead of a default every downstream party re-derives, possibly differently.
 
 Run `io.minaret.broker.Application` from the IDE with `broker/` as the working directory.
 `application.yml` resolves `devcert.pfx`, `wwwroot` and `idl` relative to it. Only one broker can hold
-a realm's pipe, so stop any other broker in the same realm (including a C# one) first.
+a realm's pipe, so stop any other broker in the same realm first.

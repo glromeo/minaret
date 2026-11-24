@@ -4,7 +4,7 @@ import { DEFAULT_REALM, resolveRealm } from "./realm.js";
 
 /**
  * Broker discovery over the realm-scoped named pipe the Broker publishes on, mirroring
- * Runtime/Discovery/BrokerDiscovery.cs. This is the **Node** half of the module; the browser gets
+ * runtime's BrokerDiscovery. This is the **Node** half of the module; the browser gets
  * broker-discovery.browser.js instead, selected by the `browser` export condition — which is why
  * everything importing this does so through the package's own name rather than a relative path, so
  * the condition actually applies.
@@ -16,7 +16,7 @@ import { DEFAULT_REALM, resolveRealm } from "./realm.js";
 const PIPE_NAME_PREFIX = "MessageBus.Broker.ConnectionInfo";
 
 /**
- * The realm-scoped pipe name, uppercased exactly as the C# side uppercases it — the two must agree
+ * The realm-scoped pipe name, uppercased exactly as the Broker uppercases it — the two must agree
  * character for character or a client silently fails to find a Broker that is running.
  */
 export function pipeName(realm) {
@@ -24,9 +24,7 @@ export function pipeName(realm) {
 }
 
 /**
- * The Windows path form of that pipe. Node addresses a named pipe as a filesystem-shaped path,
- * whereas .NET's NamedPipeClientStream takes a server (".") and the bare name and assembles this
- * itself.
+ * The Windows path form of that pipe. Node addresses a named pipe as a filesystem-shaped path.
  */
 export function pipePath(realm) {
     return `\\\\.\\pipe\\${pipeName(realm)}`;
@@ -63,8 +61,8 @@ export function discover(realm = resolveRealm(), { signal } = {}) {
 
 /**
  * Where to connect a WebSocket for this realm. The Broker listens on localhost over TLS, so a
- * discovered port is all that is needed to build the URL — the same one Runtime/Program.cs's
- * connection factory builds.
+ * discovered port is all that is needed to build the URL — the same one runtime's Channels.connect
+ * builds.
  */
 export async function resolveBrokerUrl({ realm = resolveRealm() ?? DEFAULT_REALM, signal } = {}) {
     const info = await discover(realm, { signal });

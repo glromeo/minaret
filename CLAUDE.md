@@ -23,11 +23,9 @@ the thing it explains lives, not here.
 
 ## Project state
 
-Minaret is a message bus, the Java successor to the C# MessageBus solution. It was moved here from
-there: `broker` was its Java broker, `runtime` its Java client, and the examples are Java ports of the
-C# ones. It stays **wire-identical** to the C# side (same `M01` frames, port, realm pipe name,
-`MESSAGEBUS_REALM`), so C# and JS clients still connect to this broker during the migration. Brand
-strings that cross the wire still say `messagebus`; Java packages are `io.minaret.*`.
+Minaret is a message bus: a broker, a Java client (`runtime`) and a JS client (`javascript`), all
+speaking the `M01` wire protocol. Brand strings that cross the wire (realm pipe name,
+`MESSAGEBUS_REALM`) say `messagebus`; Java packages are `io.minaret.*`.
 
 - Layer 0 (router, wire, direct routing) and Layer 1 (channels, topics, subscribe, publish fanout,
   request/reply correlation, presence events, channel reclaim) work end to end. `examples/layer1` is
@@ -44,7 +42,7 @@ strings that cross the wire still say `messagebus`; Java packages are `io.minare
   `Events`, `CloseCodes`), written once in `runtime` and once in `broker/.../contract`, pinned together
   by `ContractParityTest`. Read it before
   adding a header field, verb or event name, or touching topic addressing.
-- **`wire-protocol` skill**: the `M01` codec carrying all of the above, and the four places it is
+- **`wire-protocol` skill**: the `M01` codec carrying all of the above, and the three places it is
   implemented.
 - **`broker/CLAUDE.md`**: routing, the registries, `SendRing`, identity, events, the IDL repository,
   policy, shutdown, and the Netty pipeline's traps.

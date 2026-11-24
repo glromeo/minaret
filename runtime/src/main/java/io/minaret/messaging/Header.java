@@ -18,9 +18,8 @@ import java.util.UUID;
  * built to send a body already knows how that body is encoded and how long it is, and a received header
  * already carries both facts about how its body arrived.
  *
- * The withX methods stand in for C#'s `with` expression. They exist only for the fields something
- * actually re-stamps — a general-purpose builder would invite copies that silently drop a field added
- * later, which is exactly what `with` protects the C# side from.
+ * The withX methods exist only for the fields something actually re-stamps — a general-purpose
+ * builder would invite copies that silently drop a field added later.
  */
 public record Header(
         UUID from,

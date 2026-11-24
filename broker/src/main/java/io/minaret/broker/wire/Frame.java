@@ -14,9 +14,7 @@ import java.nio.charset.StandardCharsets;
  * channel.resolve, copies out what it needs before it yields. Offsets index the buffer passed to
  * parse, which stays valid only until Session releases it.
  *
- * The grammar and error strings are those of C#'s TryParseHeaderFields and ReceiveFrameAsync,
- * checked in the same order, so the two Brokers drop the same frames with the same reason.
- * WireTest pins the literals.
+ * WireTest pins the grammar and error strings.
  */
 public final class Frame {
 
@@ -56,10 +54,9 @@ public final class Frame {
      * Parses message, which is the whole WebSocket message from readerIndex to writerIndex.
      *
      * null means the frame parsed; otherwise the answer is why not. When fatal() is then true, the
-     * header outgrew MAX_HEADER_BYTES, which C# raises as a WebSocketException that ends the
-     * connection. Otherwise the frame is dropped.
+     * header outgrew MAX_HEADER_BYTES, which ends the connection. Otherwise the frame is dropped.
      *
-     * A message with no body separator is a header-only frame, as in ReceiveFrameAsync, not a
+     * A message with no body separator is a header-only frame, not a
      * "missing body separator" error.
      */
     public String parse(ByteBuf message) {
@@ -273,7 +270,7 @@ public final class Frame {
         time = 0;
         if (start == end) return null;
 
-        // long.TryParse with AllowLeadingSign: one optional sign, at least one digit, no overflow.
+        // One optional sign, at least one digit, no overflow.
         boolean negative = false;
         int i = start;
         byte first = buf.getByte(i);

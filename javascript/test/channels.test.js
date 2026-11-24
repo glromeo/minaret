@@ -10,7 +10,7 @@ import { FakeConnection, settle } from "./fake-connection.js";
 
 /**
  * The handles are what these drive, not MessageBus — MessageBus runs real discovery and builds a
- * real socket, whereas a handle is constructible against a fake. Same split the C# tests make.
+ * real socket, whereas a handle is constructible against a fake.
  */
 async function connected(topicId = newGuid(), providerRouteId = newGuid()) {
     const connection = new FakeConnection();

@@ -16,9 +16,8 @@ They are kept identical by hand and pinned by `broker/.../contract/ContractParit
 `Verbs`, event names and `CloseCodes` constant by constant, and each shared body's record components (its
 JSON properties). Pair a new body there when you add one. Broker tests also build and read every frame
 with runtime's codec (`TestBus`, `e2e/`). A third copy is
-`javascript/src/messaging/` (`verbs.js`, `events.js`, `connection.js`'s `CloseCodes`). The old C#
-`Runtime/Messaging` is a fourth peer during migration. Adding a verb, event name or field means all of
-them.
+`javascript/src/messaging/` (`verbs.js`, `events.js`, `connection.js`'s `CloseCodes`). Adding a verb,
+event name or field means all of them.
 
 Broker-side internals are in `broker/CLAUDE.md`, client-side in `runtime/CLAUDE.md`, and the `M01`
 codec that carries all of this is the `wire-protocol` skill. The types carry `/** */` blocks of their

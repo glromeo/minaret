@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The port of Broker.Tests' MessageRoutingTests: the real server, the real pipeline, real sockets.
+ * Message routing end to end: the real server, the real pipeline, real sockets.
  * One Broker for the class, in a realm of its own, for the reason BrokerFactory gives: the Default
  * realm's pipe is held by whatever Broker the developer is running.
  */

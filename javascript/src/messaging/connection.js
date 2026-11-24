@@ -1,8 +1,8 @@
 /**
  * The transport contract Router depends on instead of a WebSocket directly, so Router can be driven
- * against a fake. Mirrors Runtime/Messaging/IConnection.cs and ConnectionState.cs, merged into one
- * module for the one reason a merge is justified here: an interface has no runtime existence in
- * JavaScript, so IConnection's whole content is the type declaration next door and only
+ * against a fake. Mirrors runtime's Connection and ConnectionState, merged into one module for the
+ * one reason a merge is justified here: an interface has no runtime existence in JavaScript, so
+ * Connection's whole content is the type declaration next door and only
  * ConnectionState survives into the emitted code.
  *
  * A Connection exposes:
@@ -28,7 +28,7 @@ export const ConnectionState = Object.freeze({
 
 /**
  * WebSocket close codes the Broker uses to say why it closed a connection. Mirrors
- * `Runtime/Messaging/CloseCodes.cs`, which carries the full rationale.
+ * runtime's CloseCodes.
  *
  * `Superseded` (4001) means another connection registered under this client's identity and took its
  * RouteId. It is **terminal**: `Router` disarms its reconnect policy rather than retrying, because a

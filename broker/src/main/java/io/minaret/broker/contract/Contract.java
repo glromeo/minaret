@@ -8,17 +8,16 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * The JSON bodies the Broker reads or writes, mirroring Runtime/Messaging (Channels.cs, Events.cs,
- * Router.cs's ClientInfo). Each record is @Serdeable, so Micronaut generates its (de)serializer at
+ * The JSON bodies the Broker reads or writes, mirroring runtime's ControlBodies, Events and
+ * ClientInfo. Each record is @Serdeable, so Micronaut generates its (de)serializer at
  * compile time and nothing here is read by reflection.
  *
  * Bodies are the control plane only. Session reads one per Broker-addressed frame and writes one per
- * ack or event, and never decodes a relayed body. Field names are the C# properties camelCased, as
- * Runtime's Json.Options writes them. Nulls are written, as System.Text.Json writes them, through
- * application.yml's serde inclusion setting.
+ * ack or event, and never decodes a relayed body. Field names are camelCase. Nulls are written,
+ * through application.yml's serde inclusion setting, so every ack carries every field.
  *
- * A field C# declares `required` is checked non-null in the canonical constructor. Json.read turns
- * that failure into "no parseable body", the same drop a missing required member gives in C#.
+ * A required field is checked non-null in the canonical constructor. Json.read turns that failure
+ * into "no parseable body", so the frame is dropped.
  */
 public final class Contract {
 

@@ -54,7 +54,7 @@ class GzipTest {
             assertEquals(text, Gzip.decompressUtf8(jdkGzip(text.getBytes(StandardCharsets.UTF_8))));
     }
 
-    /** Another sender's gzip may set every optional header field RFC 1952 allows; .NET and browsers set none, but nothing forbids it. */
+    /** Another sender's gzip may set every optional header field RFC 1952 allows; browsers set none, but nothing forbids it. */
     @Test
     void decompress_skipsEveryOptionalHeaderField() throws IOException {
         byte[] plain = "optional fields".getBytes(StandardCharsets.UTF_8);

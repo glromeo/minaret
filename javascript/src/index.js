@@ -1,7 +1,7 @@
 /**
- * The package's public surface. There is no counterpart file under Runtime/ — C# has namespaces and
- * a compiled assembly boundary where this has one entry point — so the layout below is the one place
- * this port answers a question the C# side never has to.
+ * The package's public surface. There is no counterpart in runtime/ — Java has packages and a jar
+ * boundary where this has one entry point — so the layout below is the one place this client answers
+ * a question runtime never has to.
  *
  * Everything is also reachable at its own path (`@messagebus/client/messaging/router`,
  * `@messagebus/client/discovery`, …), which is what keeps a file here a file there.

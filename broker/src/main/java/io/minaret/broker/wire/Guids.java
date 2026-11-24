@@ -7,13 +7,13 @@ import java.util.Arrays;
 
 /**
  * The header encoding of a 128-bit id: base64url over its 16 bytes in RFC-4122 (big-endian) order,
- * unpadded, so exactly 22 characters. The same encoding as runtime's Guids and C#'s
- * TryReadGuid/AppendGuidBytes, pinned by the shared literal
+ * unpadded, so exactly 22 characters. The same encoding as runtime's Guids, pinned by the
+ * shared literal
  * 00112233-4455-6677-8899-aabbccddeeff ⇄ ABEiM0RVZneImaq7zN3u_w.
  *
  * Works straight between buffer bytes and the two longs, with no byte[] or String in between. 22
  * sextets are 132 bits: the first 64 are msb, the next 64 lsb, and the last 4 are padding, ignored on
- * read as .NET's decoder ignores them.
+ * read.
  *
  * Frame.parse reads every to/from/replyTo segment through decode. FrameWriter writes every id it
  * stamps — From, the resolved To, an echoed ReplyTo — through encode.

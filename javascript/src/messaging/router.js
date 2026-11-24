@@ -9,7 +9,7 @@ import { prepareBody, tryParseBody } from "./utils/wire.js";
 import { Verbs } from "./verbs.js";
 
 /**
- * A client's connection to the Broker, mirroring Runtime/Messaging/Router.cs.
+ * A client's connection to the Broker, mirroring runtime's Router.
  *
  * A message bus, not a WebSocket wrapper: no raw string API, only the structured surface below, with
  * the transport a private detail behind a Connection.
@@ -87,8 +87,8 @@ export class Router {
          * The Monitoring app is what needs it: a client whose point is to *show* the connection needs
          * the transitions, not a pull-only state.
          *
-         * No counterpart on the C# Router, which leaves a caller to watch IConnection.State and
-         * OnDisconnected separately. Router is the right home because it is the only thing that knows
+         * Spares a caller watching Connection.state and onDisconnected separately. Router is the
+         * right home because it is the only thing that knows
          * when "open" is true in the sense that matters — after registration, not merely when the
          * socket opened.
          */
@@ -110,8 +110,7 @@ export class Router {
     /**
      * Arms retrying: every later `connect` retries, and the connection it adopts heals itself.
      *
-     * A setter, not an action — the JavaScript shape of Router.cs's `Reconnect(min, max, maxRetries)`.
-     * That is what keeps `connect` the only way to connect, with a reconnect simply `connect` running
+     * A setter, not an action. That is what keeps `connect` the only way to connect, with a reconnect simply `connect` running
      * again, rather than a `connect`/`connectPersistent` pair.
      *
      * A failed attempt — socket refused, registration never acked — is retried after minDelayMs,
@@ -315,8 +314,8 @@ export class Router {
      * Called from `connectTo` rather than the disconnect handler, so every connect — first or
      * reconnect — counts as finished only once the picture is whole again.
      *
-     * No counterpart in Router.cs, which re-registers on reconnect but does not re-subscribe. See
-     * CLAUDE.md's divergence list.
+     * Re-registering alone would leave a reconnected client armed for events it no longer receives.
+     * runtime's Router does the same.
      */
     async #resubscribeAll(signal) {
         await Promise.all(this.#subscriptions.map(options => this.#subscribe(options, signal)));
@@ -429,7 +428,7 @@ export class Router {
 }
 
 /**
- * A ClientInfo for a new connection, mirroring C#'s `new ClientInfo()` defaults: routeId left null
+ * A ClientInfo for a new connection, mirroring runtime's ClientInfo defaults: routeId left null
  * so the Broker assigns one (its "client.registered" ack always carries a concrete value), a stable
  * identity so a reconnect from a fresh process gets the same RouteId back (see IdentityRegistry on
  * the Broker side), a clock offset of 0 — the client leaves it there, it is the Broker's to stamp —
@@ -440,8 +439,7 @@ export function newClientInfo({identity = defaultIdentity(), ...properties} = {}
 }
 
 /**
- * "{program}@{version}" as a best-effort stand-in for C#'s entry-assembly name/version — there is no
- * single JS equivalent across Node and the browser. Coarse on purpose, matching the other runtimes:
+ * "{program}@{version}" as a best-effort program name/version — there is no single JS source across Node and the browser. Coarse on purpose, matching the other runtimes:
  * it identifies "this program", not "this running instance of it" — a caller running more than one
  * logical client in one process (a demo pairing a provider with its client, a test simulating
  * several) must override identity per instance, or they collide under the Broker's "newer wins" rule

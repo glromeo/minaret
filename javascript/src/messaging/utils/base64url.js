@@ -1,7 +1,6 @@
 /**
  * base64url over raw bytes, unpadded — the encoding the wire format uses for Guids and for gzipped
- * bodies. Stands in for System.Buffers.Text.Base64Url, which the C# side gets from the BCL; there is
- * no counterpart file under Runtime/ because there is nothing there to write.
+ * bodies. runtime gets it from java.util.Base64, so it has no counterpart file.
  *
  * The alphabet (A-Z a-z 0-9 - _) is disjoint from the frame's own `|` and `\0` delimiters and from
  * the `/` that marks a channel/topic path, which is why an encoded value never needs escaping and a

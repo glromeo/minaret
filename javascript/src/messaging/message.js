@@ -1,11 +1,11 @@
 import { BodyEncoding } from "./utils/wire.js";
 
 /**
- * The structured envelope, mirroring Runtime/Messaging/Message.cs.
+ * The structured envelope, mirroring runtime's Message.
  *
  * Destination and Header are frozen plain objects rather than classes, because every consumer of
- * them is either the codec or a `{ ...header, ... }` re-stamp — the JavaScript spelling of C#'s
- * `with` expression, and relied on for the same reason: a field added later survives every copy site
+ * them is either the codec or a `{ ...header, ... }` re-stamp, and relied on for that:
+ * a field added later survives every copy site
  * automatically, where a hand-written copy would silently drop it.
  */
 
@@ -63,8 +63,7 @@ export const Destination = Object.freeze({
 });
 
 /**
- * Builds a Header with the rarely-set fields defaulted — the equivalent of C#'s property
- * initializers on the record.
+ * Builds a Header with the rarely-set fields defaulted.
  *
  * `time` defaults to 0, not Date.now(). 0 is the unset sentinel and Router.sendMessage is what stamps
  * it. A caller stamping its own clock here would defeat the Broker's clock-offset estimate, computed

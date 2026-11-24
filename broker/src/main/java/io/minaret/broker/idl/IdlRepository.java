@@ -23,8 +23,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * The .idl document store: one file per document, and an Etag that is a hash of the bytes. This is
- * the port of C#'s IdlRepository. CLAUDE.md "The IDL repository" gives the rationale.
+ * The .idl document store: one file per document, and an Etag that is a hash of the bytes.
+ * CLAUDE.md "The IDL repository" gives the rationale.
  *
  * The store is the directory messagebus.idl.path names, resolved against the working directory
  * (broker/idl by default).

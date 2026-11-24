@@ -27,13 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The Broker's byte codec pinned against the literals C#'s WireTests and runtime's WireTest pin.
+ * The Broker's byte codec pinned against the literals runtime's WireTest pins.
  * Where an expected frame is needed, it is rendered by runtime's string codec,
  * so this also checks that the two implementations agree.
  *
- * Frame.parse follows the receive path, not Wire.TryParseHeader: a message with no \0 is a header-only
- * frame. So the three C# "missing body separator" rows reappear here as whichever error the header
- * itself earns.
+ * Frame.parse follows the receive path: a message with no \0 is a header-only frame, never "missing
+ * body separator", so such a frame fails with whichever error the header itself earns.
  */
 class WireTest {
 

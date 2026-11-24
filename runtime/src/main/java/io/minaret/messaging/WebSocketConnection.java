@@ -20,10 +20,10 @@ import java.util.concurrent.CompletionStage;
 /**
  * The real {@link Connection}, over the JDK's own WebSocket client — no Netty, no dependency.
  *
- * Two things the JDK forces that the C# side does not:
+ * Two things the JDK forces:
  *
- * - Text arrives as CharSequence fragments with a last flag, so this stitches them itself. That is the
- *   one place C#'s ReceiveFrameAsync job reappears; there is still no relay path and no pooling, since
+ * - Text arrives as CharSequence fragments with a last flag, so this stitches them itself. There is
+ *   still no relay path and no pooling, since
  *   a client is always its body's actual consumer.
  * - sendText must not be called again until the previous send's future completes. Sends are therefore
  *   chained through one future rather than issued concurrently — without it, two threads publishing at
@@ -58,7 +58,7 @@ public final class WebSocketConnection implements Connection {
     }
 
     /**
-     * An HttpClient that trusts any certificate, for reaching a Broker on the ASP.NET development
+     * An HttpClient that trusts any certificate, for reaching a Broker on the localhost development
      * certificate — which no Java truststore knows about.
      *
      * This disables certificate validation outright. It is a development affordance and is named like

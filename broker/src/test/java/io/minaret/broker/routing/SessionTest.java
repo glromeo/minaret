@@ -29,9 +29,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The port of Broker.Tests' ClientSessionTests: handshake, teardown, identity, and the event plane,
- * one Session at a time on an EmbeddedChannel. A unit test rather than an e2e one for the same
- * reason as the C# original: it drives a teardown at moments no real client can produce on cue.
+ * Session: handshake, teardown, identity, and the event plane, one Session at a time on an
+ * EmbeddedChannel. A unit test rather than an e2e one because it drives a teardown at moments no
+ * real client can produce on cue.
  */
 class SessionTest {
 

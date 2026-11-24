@@ -29,8 +29,8 @@ import java.util.UUID;
 
 /**
  * A Broker with no server: real registries and real Sessions, each mounted on a Netty EmbeddedChannel.
- * This is the counterpart of Broker.Tests' FakeWebSocket. It is what lets a test drive a teardown at
- * a moment no real client can be made to produce, or watch two sessions overlap.
+ * It is what lets a test drive a teardown at a moment no real client can be made to produce, or watch
+ * two sessions overlap.
  *
  * Frames are built and read back with the Java *client's* codec (io.minaret.messaging.wire), so
  * every assertion here also checks that the Broker's bytes parse under a second implementation of

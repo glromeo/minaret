@@ -5,8 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
- * A multicast callback list — Java's stand-in for C#'s `event Action&lt;T&gt;`, where add/remove are
- * += and -=.
+ * A multicast callback list.
  *
  * Backed by a copy-on-write list so emit iterates a snapshot. That is not a general concurrency
  * nicety: every request/ack helper in this runtime removes its own correlator from inside the emit

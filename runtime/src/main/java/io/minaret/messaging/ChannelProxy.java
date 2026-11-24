@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * This is the half of Layer 2 the JavaScript port could not carry across — decorators there need the
  * transpile step that package exists to avoid. Java has runtime annotations and a reflective proxy in
- * the JDK, so the C# DispatchProxy design ports directly rather than needing a redesign.
+ * the JDK, so nothing needs transpiling.
  */
 final class ChannelProxy implements InvocationHandler {
 

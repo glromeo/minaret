@@ -14,7 +14,7 @@ import io.netty.buffer.ByteBufAllocator;
  * never masked (RFC 6455 §5.1), so the header is a pure function of the length. WS_RESERVE bytes are
  * reserved in front and the header is back-filled once the length is known.
  *
- * Field order and rendering follow C#'s WriteHeaderBytes: empty means absent, a Time of 0 is not
+ * Field order and rendering: empty means absent, a Time of 0 is not
  * written, a TTL is written whenever it is set, and extras ride after the bodyLength field.
  */
 public final class FrameWriter {
@@ -33,7 +33,7 @@ public final class FrameWriter {
     /**
      * The relay: frame's header re-stamped by Policy (To, Time, TTL, From) with everything else
      * carried through — type and extras as raw bytes, replyTo/enc/bodyLength re-rendered from their
-     * parsed values, which is what C#'s `header with { ... }` re-render produces. The body is copied
+     * parsed values. The body is copied
      * across byte for byte and never decoded.
      *
      * Every forwarding path renders through this: Session's forwardToRoute, dispatch, notify and

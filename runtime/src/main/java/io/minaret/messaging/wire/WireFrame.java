@@ -5,8 +5,8 @@ import io.minaret.messaging.Header;
 /**
  * A parsed header plus the body exactly as it arrived — still base64url'd gzip when the header says so.
  *
- * The body is a String rather than bytes, matching the JavaScript port and diverging from C#'s byte
- * path. That path exists so the Broker can relay a body it never decodes and stitch socket fragments;
+ * The body is a String rather than bytes, matching the JavaScript client and diverging from the
+ * Broker's byte path. That path exists so the Broker can relay a body it never decodes and stitch socket fragments;
  * nothing here relays, because a client is always its body's actual consumer.
  */
 public record WireFrame(Header header, String body) {

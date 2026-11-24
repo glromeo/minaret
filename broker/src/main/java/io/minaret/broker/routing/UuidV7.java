@@ -5,8 +5,8 @@ import io.minaret.broker.wire.Uuid;
 import java.security.SecureRandom;
 
 /**
- * RFC 9562 version-7 ids: 48 bits of Unix milliseconds, then random bits. This is what C#'s
- * Guid.CreateVersion7 mints, and the JDK has no equivalent.
+ * RFC 9562 version-7 ids: 48 bits of Unix milliseconds, then random bits. The JDK has
+ * no equivalent.
  *
  * IdentityRegistry mints a RouteId this way for an identity seen for the first time. ChannelRegistry
  * mints a TopicId this way for every new topic. Both are time-ordered, so ids read in creation order

@@ -1,6 +1,6 @@
 /**
- * The Header.type vocabulary, mirroring Runtime/Messaging/Verbs.cs so the three implementations
- * (Runtime, Broker, this) can't drift on a string literal.
+ * The Header.type vocabulary, mirroring runtime's Verbs so the three implementations
+ * (runtime, broker, this) can't drift on a string literal.
  *
  * Type is the *verb* — what the recipient should do with the message — and nothing else. Topic
  * identity lives in Header.to, so "what is this?" and "which topic is this?" are separate fields:

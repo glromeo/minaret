@@ -71,9 +71,8 @@ public class Router implements AutoCloseable {
      * A list rather than a map keyed by name, because two {@code on} calls narrowing one name
      * differently are additive and a map would drop one of the narrowings on reconnect.
      *
-     * The C# Router re-registers but does not re-subscribe, leaving a reconnected client armed for
-     * events it no longer receives — handlers intact, stream gone. The JavaScript port fixed that;
-     * this matches it.
+     * Re-registering alone would leave a reconnected client armed for events it no longer receives —
+     * handlers intact, stream gone. The JavaScript client does the same.
      */
     private final List<Events.Subscription> subscriptions = new ArrayList<>();
 
@@ -136,8 +135,8 @@ public class Router implements AutoCloseable {
     /**
      * Raised with true once registration completes and false when the connection drops.
      *
-     * Any client that displays its connection needs it, which is why it exists here and not on the C#
-     * side — where a caller watches Connection.state and the disconnect event separately.
+     * Any client that displays its connection needs it, rather than watching Connection.state and the
+     * disconnect event separately.
      *
      * Router is the right home because it is the only thing that knows when open is true in the sense
      * that matters: after registration, not merely when the socket opened.
@@ -162,7 +161,7 @@ public class Router implements AutoCloseable {
     /**
      * Arms retrying: every later {@link #connect} retries, and the connection it adopts heals itself.
      *
-     * A setter, not an action — the Java shape of Router.cs's {@code Reconnect}. That is what keeps
+     * A setter, not an action. That is what keeps
      * connect the only way to connect, with a reconnect simply connect running again, rather than a
      * {@code connect}/{@code connectPersistent} pair.
      *
@@ -180,7 +179,7 @@ public class Router implements AutoCloseable {
     }
 
     /**
-     * {@link #reconnect(int, int, int)} with C#'s defaults: 500ms floor, 30s ceiling, unbounded
+     * {@link #reconnect(int, int, int)} with the defaults: 500ms floor, 30s ceiling, unbounded
      * retries.
      */
     public void reconnect() {
@@ -410,8 +409,7 @@ public class Router implements AutoCloseable {
      * Subscribed to Connection.onFrame by connectTo, and the reason wire order survives a transport
      * that promises nothing about delivery threads.
      *
-     * The frame's body is a plain String, so unlike the C# byte path nothing here has a lifetime that
-     * ends when this returns.
+     * The frame's body is a plain String, so nothing here has a lifetime that ends when this returns.
      */
     private void onFrame(WireFrame frame) {
         inbound.execute(() -> {

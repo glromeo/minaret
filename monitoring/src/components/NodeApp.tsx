@@ -11,7 +11,7 @@ import { CopyButton } from "./CopyButton";
  * The verb this panel's Layer-0 sends carry. Any verb the Broker doesn't recognise as control- or
  * data-plane falls through to a plain RouteId forward, so this is one arbitrary choice among many
  * rather than a reserved name — which is why it lives here and not in the client runtime's `Verbs`,
- * the shared vocabulary, where the C# side has no such member either.
+ * the shared vocabulary.
  */
 const LAYER_0_VERB = "message";
 
@@ -333,7 +333,7 @@ export function NodeApp({ nodeId, title }: { nodeId: Guid; title: string }) {
 
                                     {!channel.ready && !channel.error && (
                                         // channel.resolve blocks Broker-side with no timeout until a
-                                        // provider registers this name (see ClientSession.HandleChannelResolveAsync) —
+                                        // provider registers this name (see Session.handleChannelResolve) —
                                         // this can be indefinite, so say so rather than leaving the
                                         // row looking stuck with no explanation. The topic form below
                                         // is withheld until then — a client can't create/subscribe

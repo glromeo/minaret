@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Takes /msgbus off Micronaut's request pipeline and hands the connection to a raw Netty Session.
- * This is Program.cs's `app.Map("/msgbus", ...)`.
  *
  * Micronaut's own WebSocket support surfaces messages as String or byte[]. That is a heap copy of
  * every frame, which is exactly what this Broker exists to avoid. So this handler sits directly
@@ -43,18 +42,17 @@ import java.util.concurrent.TimeUnit;
  * The Micronaut handlers behind it are removed, along with Micronaut's idle-state handler, whose
  * timeout is an HTTP request idle rather than a socket keepalive.
  *
- * Per-message compression stays off, as in C#. Bodies cross the Broker opaque, and compression
+ * Per-message compression stays off. Bodies cross the Broker opaque, and compression
  * belongs to the M01 body.
  *
- * UTF-8 validation is off too. The Broker never decodes a relayed body, and Kestrel does not
- * validate either.
+ * UTF-8 validation is off too: the Broker never decodes a relayed body.
  */
 final class MsgbusUpgrade extends ChannelInboundHandlerAdapter {
 
     static final String NAME = "messagebus-upgrade";
     static final String PATH = "/msgbus";
 
-    /** Kestrel's KeepAliveInterval. Session pings after one silent period and closes after a second. */
+    /** The keepalive period. Session pings after one silent period and closes after a second. */
     private static final long KEEPALIVE_SECONDS = 30;
 
     private final Bus bus;

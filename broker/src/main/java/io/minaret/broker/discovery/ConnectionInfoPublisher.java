@@ -21,16 +21,13 @@ import java.io.RandomAccessFile;
 import java.util.Locale;
 
 /**
- * Serves this Broker's port on the realm's discovery pipe, the port of C#'s
- * BrokerConnectionInfoPublisher. The pipe name is the same,
- * MessageBus.Broker.ConnectionInfo.{REALM upper}, and so is the payload: exactly {"port":N} in
- * UTF-8, with no length prefix and no newline. That is what lets every client runtime discover this
- * Broker unchanged.
+ * Serves this Broker's port on the realm's discovery pipe,
+ * MessageBus.Broker.ConnectionInfo.{REALM upper}. The payload is exactly {"port":N} in UTF-8, with
+ * no length prefix and no newline, which is what every client runtime reads.
  *
  * The pipe is created eagerly. This is a @Context bean, so it is built at startup, and with one
- * instance allowed a second Broker in the same realm fails to start, as the C# host does, instead of
- * silently serving nothing. It is outbound-only: C# creates it with PipeDirection.Out, which is why
- * clients must open it "r".
+ * instance allowed a second Broker in the same realm fails to start instead of silently serving
+ * nothing. It is outbound-only, which is why clients must open it "r".
  *
  * The port is the one the server actually bound, learned from ServerStartupEvent rather than parsed
  * back out of configuration, so a random test port publishes correctly too.

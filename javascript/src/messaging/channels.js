@@ -8,15 +8,14 @@ import { Verbs } from "./verbs.js";
 import { WebSocketConnection } from "./websocket-connection.js";
 
 /**
- * The Layer-1 client surface over Router, mirroring Runtime/Messaging/Channels.cs.
+ * The Layer-1 client surface over Router, mirroring runtime's Channels.
  *
  * The wire bodies for the channel/topic control plane are not declared here as types — they are
  * plain object literals at the call sites below (`{ channelName }`, `{ channelName, topic }`), and
- * the shapes live in channels.d.ts. The C# file declares them as records because the Broker shares
- * that file; nothing is shared across the language boundary except the JSON itself.
+ * the shapes live in channels.d.ts. Nothing is shared with the Broker except the JSON itself.
  *
- * Not ported: Layer 2's annotated surface (Runtime/Messaging/Annotations.cs, Annotated.cs). It is
- * built on attributes and DispatchProxy, and the JavaScript equivalents — decorators and metadata —
+ * Not ported: Layer 2's annotated surface (runtime's Channel, Topic, ChannelProxy). It is built on
+ * annotations and a reflective proxy, and the JavaScript equivalents — decorators and metadata —
  * need a transpile step this package exists to avoid. See CLAUDE.md.
  */
 
@@ -27,11 +26,10 @@ import { WebSocketConnection } from "./websocket-connection.js";
  * That is what makes a bare `provider.dispatch(topic, body)` from inside a handler route back to the
  * one client that asked, with nothing threaded through by hand.
  *
- * Valid only for the *synchronous* part of a handler. C# uses an AsyncLocal, which flows across
- * awaits; there is no portable equivalent here, since AsyncLocalStorage is Node-only, so this is a
- * plain variable saved and restored around the call. A handler replying after an await must pass the
- * header it received — which the C# binding layer does anyway, for the related reason that resting a
- * reply's correctness on where a handler yields is a poor bargain even when the language carries it.
+ * Valid only for the *synchronous* part of a handler. There is no portable async-context carrier,
+ * since AsyncLocalStorage is Node-only, so this is a plain variable saved and restored around the
+ * call. A handler replying after an await must pass the header it received — which runtime's binding
+ * layer does anyway, for the related reason that resting a reply's correctness on where a handler yields is a poor bargain even when the language carries it.
  */
 let inFlightRequest = null;
 
@@ -547,8 +545,7 @@ export class ChannelClient extends ChannelBase {
  * encapsulates the discovery/transport boilerplate every call site otherwise repeats, and answers a
  * connected handle for creating or connecting to channels.
  *
- * The C# counterpart builds a generic host to get DI and a logging pipeline; there is nothing to
- * build here, so what remains is the part that actually matters — resolving where the Broker is and
+ * What it does is the part that actually matters — resolving where the Broker is and
  * standing up a Router over a WebSocket to it.
  */
 export class MessageBus {

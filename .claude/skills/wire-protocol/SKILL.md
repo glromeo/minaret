@@ -29,15 +29,12 @@ something checkable. A change to framing or field order lands in all of them:
   records where each field lies and decodes only what routing reads (ids into probe `Uuid`s, numbers
   into primitives), builds no `String`, and copies nothing. `FrameWriter.relay` renders a re-stamped
   header around the received body into one pooled buffer, with the WebSocket header back-filled in
-  front; `originate` does the same for a broker-authored frame. The grammar and error strings match the
-  C# Broker's, checked in the same order, so both brokers drop the same frames for the same reason. A
+  front; `originate` does the same for a broker-authored frame. A
   message with no `\0` is header-only, not "missing body separator". Headers past `MAX_HEADER_BYTES`
   are fatal to the connection. Pinned by `broker/.../wire/WireTest`.
 - **`javascript/src/messaging/utils/wire.js`**, text-only like runtime, with an async body decode
   since gzip goes through `DecompressionStream`. Pinned by `javascript/test/wire.test.js`
   (`node --test`).
-- The C# `Runtime/Messaging/Utils/Wire.cs` in the old MessageBus repo is the original, still a live
-  peer during migration.
 
 ## The rules
 
@@ -63,8 +60,7 @@ something checkable. A change to framing or field order lands in all of them:
   parses back as `0`, **not** null. Do not collapse them: invisible today, since the policy treats null
   and 0 alike, but a silent bug the moment it distinguishes them.
 - **Guids: base64url of the 16 raw bytes, RFC-4122 big-endian, unpadded, exactly 22 chars** (vs 36). In
-  Java that is `getMostSignificantBits` then `getLeastSignificantBits`. (C#'s `Guid.ToByteArray()` is
-  little-endian for the first three fields, which is why the C# side asks for big-endian explicitly.)
+  Java that is `getMostSignificantBits` then `getLeastSignificantBits`.
   Pinned by `00112233-4455-6677-8899-aabbccddeeff` → `ABEiM0RVZneImaq7zN3u_w`.
 - **Numbers are decimal.** A negative `ttl` must *parse* (the broker treats it as already expired).
   Base-36 was rejected: ~4 chars saved, against a bespoke encoding every port must reimplement, when the

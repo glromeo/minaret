@@ -10,12 +10,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * One event.subscribe's narrowing, the port of C#'s EventFilter record struct.
+ * One event.subscribe's narrowing.
  *
  * EventRegistry keeps a set of these per route, so two subscriptions narrowing the same way must
- * collapse. A record gives that for free: Map.equals compares contents, which is what C# had to
- * normalise its Dictionary into sorted arrays to get. where is copied, so a caller's map cannot
- * change a filter already in a set.
+ * collapse. A record gives that for free: Map.equals compares contents. where is copied, so a
+ * caller's map cannot change a filter already in a set.
  *
  * Session.handleEventSubscribe applies one to the replay, and EventRegistry.subscribersOf applies
  * it to every live occurrence, with the same matches, so the two can never disagree.

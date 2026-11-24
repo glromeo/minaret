@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Event's channel() and topic() defaults exist for EventFilter.matches. They are not record
- * components, so they must not become serialized properties: a client event carrying "channel":null
- * would no longer be the C# Broker's body.
+ * components, so they must not become serialized properties: an event body must not carry
+ * "channel":null.
  */
 class ContractTest {
 

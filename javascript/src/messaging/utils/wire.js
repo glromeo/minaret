@@ -4,13 +4,12 @@ import { decodeBase64Url, encodeBase64Url } from "./base64url.js";
 import { decodeGuid, encodeGuid, GUID_CHARS } from "./guid.js";
 
 /**
- * The wire protocol codec, mirroring Runtime/Messaging/Utils/Wire.cs:
+ * The wire protocol codec, mirroring runtime's Wire:
  *
  *   M01|to|type|time|ttl|from|replyTo|enc|bodyLength[|extras...]\0body
  *
- * This is the protocol's second implementation, so a change to framing or field order in Wire.cs has
- * to land here too. test/wire.test.js pins the same literals WireTests pins, which is what makes that
- * checkable rather than hoped for.
+ * A change to framing or field order in Wire.java has to land here too. test/wire.test.js pins the
+ * same literals WireTest pins, which is what makes that checkable rather than hoped for.
  *
  * The format exists so the Broker can route by reading only the header: it scans to the body
  * separator, parses the prefix, and never looks past it. Fields sit in Broker read-order — `to`
@@ -22,19 +21,15 @@ import { decodeGuid, encodeGuid, GUID_CHARS } from "./guid.js";
  * 0". An explicit ttl of 0 does serialize as "0" and parse back as 0, not null; the two must not be
  * collapsed.
  *
- * Three things differ from Wire.cs, each a place a change needs thought rather than transcription:
+ * bodyLength is stamped but never read. It is a receive-side sizing hint for a fragmented socket.
+ * Stamping it costs nothing and keeps frames byte-identical to the other implementations', which is
+ * what makes them comparable at all.
  *
- * - Text, not bytes. Wire.cs carries a byte path so the Broker can relay a body it never decodes.
- *   Nothing here relays — a client is always the body's consumer — and both WebSocket
- *   implementations hand over whole messages rather than the fragments ReceiveFrameAsync stitches.
- *   So there is one string path, and no counterpart to pooling or PooledUtf8Bytes.
- * - bodyLength is stamped but never read. It is a receive-side sizing hint for a fragmented socket.
- *   Stamping it costs nothing and keeps frames byte-identical to the C# side's, which is what makes
- *   the two comparable at all.
- * - Body decoding is async. gzip goes through DecompressionStream, the only inflate available
- *   without a dependency, and it is stream-shaped. Header parsing stays synchronous, which is the
- *   half that matters: nothing awaits anything to learn where a frame is going. Router's promise
- *   chain is what keeps wire order despite the await.
+ * One thing differs from Wire.java, a place a change needs thought rather than transcription: body
+ * decoding is async. gzip goes through DecompressionStream, the only inflate available without a
+ * dependency, and it is stream-shaped. Header parsing stays synchronous, which is the half that
+ * matters: nothing awaits anything to learn where a frame is going. Router's promise chain is what
+ * keeps wire order despite the await.
  */
 
 export const TAG = "M01";
@@ -45,7 +40,7 @@ export const BODY_SEPARATOR = "\0";
  * Bodies at or above this many UTF-8 bytes are gzipped.
  *
  * Decided on the *input* size, never the compressed output. An output-size comparison would have
- * this client and the C# one frame the same message differently, since their deflate
+ * this client and runtime frame the same message differently, since their deflate
  * implementations differ.
  */
 export const COMPRESSION_THRESHOLD_BYTES = 1024;
@@ -87,7 +82,7 @@ const DECODER = new TextDecoder();
  *
  * WebSocketConnection's message handler calls it for every inbound frame.
  *
- * Non-throwing by design, mirroring TryParseHeader: a receive loop treats a malformed frame as
+ * Non-throwing by design, like runtime's Wire.parseHeader: a receive loop treats a malformed frame as
  * droppable and never fatal, so a bad frame must not cost an exception thrown out of a socket
  * callback.
  */
@@ -187,7 +182,7 @@ export async function prepareBody(header, body) {
         return { header: { ...header, encoding: BodyEncoding.Raw, bodyLength: bytes.length }, body: json };
 
     // base64url is ASCII, so its char count *is* its byte count on the wire — which is what
-    // bodyLength means for a compressed body on the C# side too.
+    // bodyLength means for a compressed body.
     const compressed = encodeBase64Url(await gzip(bytes));
     return { header: { ...header, encoding: BodyEncoding.Gzip, bodyLength: compressed.length }, body: compressed };
 }
@@ -198,7 +193,7 @@ export async function prepareBody(header, body) {
  *
  * Connection.send calls it, on what prepareBody produced.
  *
- * Validates the header only, mirroring the C# relay path: a body out of prepareBody is JSON, and
+ * Validates the header only: a body out of prepareBody is JSON, and
  * JSON.stringify escapes U+0000, so there is nothing left to reject.
  */
 export function writeHeaderAndBody(header, body) {
@@ -209,7 +204,7 @@ export function writeHeaderAndBody(header, body) {
  * Serializes a header and an already-textual body into one frame, compressing past the threshold.
  * header.encoding is overwritten with what this call decides.
  *
- * Named apart from serializeMessage for the reason the C# pair is: one name would bind a string body
+ * Named apart from serializeMessage because one name would bind a string body
  * to the JSON path and silently re-encode text that was already text.
  */
 export async function serializeText(header, body) {

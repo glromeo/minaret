@@ -1,5 +1,5 @@
 /**
- * The event vocabulary carried in an event body's `name`, mirroring Runtime/Messaging/Events.cs.
+ * The event vocabulary carried in an event body's `name`, mirroring runtime's Events.
  *
  * Several of these read identically to a control-plane verb — channel.registered is both an ack verb
  * and an event name. That is deliberate and cannot collide: an event frame's Header.type is always
@@ -70,9 +70,8 @@ export const EventOrigin = Object.freeze({
  * since a subscriber registered for one name and cares about order, not about which list the Broker
  * happened to fill.
  *
- * The lists are split by concrete shape rather than being one list, because System.Text.Json
- * serializes the *static* element type on the emitting side: a base-typed list would have emitted
- * only `name`. Exactly one is populated for any given name.
+ * The lists are split by concrete shape rather than being one list, so each element carries its
+ * whole shape rather than only `name`. Exactly one is populated for any given name.
  */
 export function replayOccurrences(replay) {
     return replay.clients ?? replay.channels ?? replay.topics ?? [];

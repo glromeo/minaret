@@ -16,16 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins this codec to the same literals broker's WireTest, javascript/test/wire.test.js and C#'s
- * WireTests pin. The protocol is written four times; these assertions are what make that checkable
+ * Pins this codec to the same literals broker's WireTest and javascript/test/wire.test.js pin. The
+ * protocol is written three times; these assertions are what make that checkable
  * rather than merely hoped for, so a literal here should be changed only alongside its counterparts.
  */
 class WireTest {
 
     /**
-     * The single most important assertion in this file. C# has to ask for big-endian explicitly because
-     * Guid.ToByteArray() is little-endian for the first three fields; Java's UUID accessors are already
-     * RFC-4122 order. If this drifts, every frame still parses locally and no frame routes between
+     * The single most important assertion in this file. Java's UUID accessors are already RFC-4122
+     * order. If this drifts, every frame still parses locally and no frame routes between
      * runtimes.
      */
     @Test
@@ -50,15 +49,11 @@ class WireTest {
     }
 
     /**
-     * Eight segments, so eight separators: to, type, time, ttl, from, replyTo, enc, bodyLength. Verified
-     * against what both other runtimes actually render for this header — C# produces
-     * M01||register||||||2\0{} and the JS client the same.
+     * Eight segments, so eight separators: to, type, time, ttl, from, replyTo, enc, bodyLength. The JS
+     * client renders M01||register||||||2\0{} too.
      *
-     * Asserted as a whole-string equality rather than a prefix, because the C# counterpart
-     * (WireTests.RoundTrips_HeaderWithEveryOptionalFieldAbsent) uses Assert.StartsWith with a trailing
-     * \0 and therefore pins nothing: .NET's string.StartsWith defaults to culture-sensitive comparison,
-     * under which NUL is a zero-weight ignorable character — so both the seven- and eight-separator
-     * prefixes pass it. That assertion needs StringComparison.Ordinal to mean what it reads as.
+     * Asserted as a whole-string equality rather than a prefix, so a seven-separator frame cannot
+     * pass.
      */
     @Test
     void emptyDestinationAndNoOptionalFieldsRenderAsBareSeparators() {

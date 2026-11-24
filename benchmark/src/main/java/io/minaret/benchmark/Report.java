@@ -13,8 +13,7 @@ import java.util.Locale;
 /**
  * One run's throughput and latency distribution, printed to stdout and appended as a CSV row.
  *
- * The CSV columns are those of the C# benchmark's benchmark-results.csv plus `mode`, so rows from
- * either can be read side by side.
+ * The CSV columns are fixed, so rows from different runs can be read side by side.
  */
 record Report(Options.Mode mode, int messages, Duration duration, double throughput,
               double min, double mean, double p50, double p95, double p99, double max) {

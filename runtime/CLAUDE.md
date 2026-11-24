@@ -9,8 +9,7 @@ file holds only what no single type can own: cross-cutting invariants, orderings
 on, and the "why not X" arguments that would otherwise be re-litigated. To know what `reconnect`
 does, read `Router.java`. To know why a reconnect is not a second connect method, read on.
 
-It was ported module-for-module from the C# `Runtime` (old MessageBus repo), and some doc blocks still
-say "C#'s X" for the design they share. `broker`'s tests use this codec to build and read every frame.
+`broker`'s tests use this codec to build and read every frame.
 
 ## Constraints that shaped it
 
@@ -48,7 +47,7 @@ say "C#'s X" for the design they share. `broker`'s tests use this codec to build
   failures are logged and swallowed, never thrown, so garbage traffic can't break the message loop.
 - **`Router` re-subscribes every event subscription on reconnect** (`subscriptions`, re-issued by
   `connectTo`). Re-registering alone would leave a reconnected client armed for events it no longer
-  receives: handlers intact, stream gone. (The C# Runtime still has this bug.)
+  receives: handlers intact, stream gone.
 
 ### Events do not surface through `handleMessage`
 
@@ -67,8 +66,8 @@ so the handler's contract is one occurrence at a time regardless of framing.
 Three correlators, one shape: `ChannelBase.awaitAck` (every control-plane round trip on a handle),
 `ChannelBase.callOnTopic` (data-plane request/reply) and `Router.sendSubscribe` (`on`'s ack). Each
 arms a `handleMessage` handler, sends, completes on the first matching frame and removes the handler
-however it ends. The C# runtime has collapsed these into one predicate-taking `AwaitReply`; doing the
-same here is in `TODO.md`. A fourth copy belongs in that primitive instead.
+however it ends. Collapsing them into one predicate-taking `awaitReply` is in `TODO.md`; a fourth copy
+belongs in that primitive instead.
 
 - **They match on a predicate, not a bare correlation id**, because the callers filter on different
   things: an ack on `type` + `replyTo`, a dispatch reply on those *plus origin*. A frame a correlator
@@ -209,9 +208,7 @@ identity at socket speed, every round emitting presence events. Clearing rather 
 - **Text WebSocket frames.** The whole bus is UTF-8 text with a `\0` body separator. Binary payloads
   ride as base64 inside a JSON string, not as binary frames.
 
-`WireTest` asserts whole frames with string equality. If it ever seems to disagree with the C#
-`WireTests` about frame shape, trust this one: `RoundTrips_HeaderWithEveryOptionalFieldAbsent` there
-uses a culture-sensitive `StartsWith`, under which NUL is ignorable, so it pins nothing.
+`WireTest` asserts whole frames with string equality, never a prefix match.
 
 ## Tests
 

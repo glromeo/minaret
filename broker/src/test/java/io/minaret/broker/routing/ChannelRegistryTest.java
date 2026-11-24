@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The registry-level half of Broker.Tests' ChannelRegistryTests. The walks here go node by node
+ * ChannelRegistry at the registry level; RoutingTest is the wire level. The walks here go node by node
  * through Topic.head and next, exactly as Session's fanout does, rather than through a snapshot.
  */
 class ChannelRegistryTest {
@@ -379,8 +379,7 @@ class ChannelRegistryTest {
      * subscribe finds the channel lock-free, so a removeChannel can land before subscribe takes the
      * lock. The invariant is that no topic outlives its channel: once the provider is gone, no id
      * subscribe handed out still resolves. Without getOrAddTopic's reference re-check, a stale
-     * Channel plants an orphan topic that nothing removes. Same assertion as C#'s
-     * TrySubscribe_RacingProviderDisconnect_LeavesNoTopicBehind.
+     * Channel plants an orphan topic that nothing removes.
      */
     @Test
     void subscribe_racingProviderDisconnect_leavesNoTopicBehind() throws Exception {

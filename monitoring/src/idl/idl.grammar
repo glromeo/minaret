@@ -145,8 +145,7 @@ array = "array" "<" type ">"
 tuple = "[" type ("," type)+ "]"
 
 /**
- * A keyed collection. Named `map` here but written `object<K, V>`, matching the attic's surface
- * syntax — the comma is the reason a regex could never split this once V was itself generic.
+ * A keyed collection. Named `map` here but written `object<K, V>`, — the comma is the reason a regex could never split this once V was itself generic.
  */
 map = "object" "<" type "," type ">"
 
@@ -162,8 +161,8 @@ stringEnum = "string" "[" identifier ("|" identifier)* "]"
 numberEnum = "number" "[" integer ("|" integer)* "]"
 
 /**
- * The unparameterized forms, kept from the attic's C# mapping: `object` is a free-form map
- * (Dictionary<string, object?>) and `array` an untyped collection (List<object?>).
+ * The unparameterized forms: `object` is a free-form map (string keys, any values) and `array` an
+ * untyped collection.
  */
 scalar = "string" / "number" / "boolean" / "date" / "object" / "array"
 
@@ -181,7 +180,7 @@ reference = link types
 identifier = [A-Za-z_] [A-Za-z0-9_]*
 
 /**
- * An enum member's value. Signed, because a C# enum's members may be negative and an IDL that
+ * An enum member's value. Signed, because an enum's members may be negative and an IDL that
  * couldn't say so would silently not describe them; integral only, because enum membership is an
  * equality test and equality on a fractional value is not one worth resting a contract on.
  */

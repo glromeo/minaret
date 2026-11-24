@@ -4,17 +4,16 @@ import { ConnectionState } from "./connection.js";
 import { tryParseHeader, writeHeaderAndBody } from "./utils/wire.js";
 
 /**
- * The real Connection, mirroring Runtime/Messaging/WebSocketConnection.cs over the platform's own
+ * The real Connection, mirroring runtime's WebSocketConnection over the platform's own
  * global WebSocket — the same class in a browser and in Node, which is why this package needs no
  * transport abstraction beyond the Connection contract itself.
  *
- * Like the C# one it does not hold a single socket for life: a WebSocket can only be opened once, so
+ * Like runtime's it does not hold a single socket for life: a WebSocket can only be opened once, so
  * `connect` disposes any previous socket and constructs a fresh one, which is what makes calling it
  * again (reconnecting) actually work.
  *
- * There is no receive *loop* here, unlike the C# side. A WebSocket delivers whole messages through
- * an event, so what Wire.ReceiveFrameAsync exists to do — stitch fragments and find the body
- * separator across them — has already happened by the time `message` fires. The one thing that does
+ * There is no receive *loop* here. A WebSocket delivers whole messages through an event, so fragments
+ * are already stitched by the time `message` fires. The one thing that does
  * carry across is the contract on a bad frame: parse failures are logged and dropped, never thrown
  * out of the callback, because a malformed frame is not connection-fatal.
  */

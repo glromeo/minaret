@@ -3,7 +3,7 @@ package io.minaret.broker.contract;
 import static io.minaret.broker.wire.Wire.ascii;
 
 /**
- * Runtime/Messaging/Verbs.cs as pre-encoded bytes.
+ * The Header.type vocabulary as pre-encoded bytes.
  *
  * Frame.typeIs compares against these in Session's dispatch, and FrameWriter writes them into the
  * frames the Broker originates, so a verb never needs a String on the hot path. The arrays are

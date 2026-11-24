@@ -41,14 +41,12 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * One accepted /msgbus connection, the port of C#'s ClientSession: the receive path, the per-session
- * state, every verb handler and the teardown. CLAUDE.md is the rationale. This block covers
- * only how the port differs.
+ * One accepted /msgbus connection: the receive path, the per-session state, every verb handler and
+ * the teardown. CLAUDE.md is the rationale. This block covers the threading model.
  *
- * Every message is handled inline, on the channel's event loop. C# dispatches each frame on its own
- * Task so that a blocking channel.resolve cannot stall the loop. Here resolve is a future that hops
- * back to the loop when it completes, so nothing blocks and inline is safe. Ordering is stronger than
- * in C# too: a connection's frames are handled strictly in arrival order.
+ * Every message is handled inline, on the channel's event loop. channel.resolve is a future that
+ * hops back to the loop when it completes, so nothing blocks and inline is safe. A connection's
+ * frames are handled strictly in arrival order.
  *
  * Because of that, all session state is confined to one thread. resolvedChannels, providedChannels
  * and frame are plain fields. Only clientInfo is volatile, since ConnectionRegistry.registered reads
@@ -178,7 +176,7 @@ public final class Session extends ChannelInboundHandlerAdapter {
     }
 
     /**
-     * Keepalive, standing in for Kestrel's KeepAliveInterval and KeepAliveTimeout. The first
+     * Keepalive. The first
      * reader-idle period is answered with a ping. A second consecutive one, still with no frame or
      * pong read, closes the connection.
      */
@@ -366,7 +364,7 @@ public final class Session extends ChannelInboundHandlerAdapter {
     /**
      * A provider broadcast: one render, then a pooled duplicate of that buffer to each live subscriber,
      * reached through the node's Route with no table lookup.
-     * Netty's reference count stands in for C#'s up-front PooledPayload count. Each duplicate is
+     * Netty's reference count tracks the holders. Each duplicate is
      * retained as it is handed out, and the original reference is released once the walk ends, so
      * the buffer outlives the walk however many queues have already finished with it.
      */
@@ -714,7 +712,7 @@ public final class Session extends ChannelInboundHandlerAdapter {
     // ---------------------------------------------------------------- teardown
 
     /**
-     * C#'s finally block, in the same order. Every RouteId-keyed table is cleaned only if this
+     * The teardown. Every RouteId-keyed table is cleaned only if this
      * session still held the RouteId: a superseded session shares it with its replacement.
      * removeChannel runs regardless, behind its own reference guard. channel.removed is emitted
      * before client.disconnected.

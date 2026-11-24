@@ -3,9 +3,6 @@
 A message bus: a broker plus Java and JavaScript clients. Clients claim named **channels**, declare
 **topics** on them, and exchange messages by publish/subscribe or request/reply, all through one broker.
 
-Minaret replaces the C# MessageBus solution and uses the same wire protocol (same `M01` frames, port,
-discovery pipe and `MESSAGEBUS_REALM`), so existing C# and JS clients connect to this broker unchanged.
-
 ## Status
 
 - Working end to end: direct routing, channels, topics, subscribe, publish fanout, request/reply,

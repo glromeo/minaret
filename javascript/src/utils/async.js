@@ -1,11 +1,10 @@
 /**
- * The two async primitives this package would otherwise spell out at every call site. They stand in
- * for TaskCompletionSource and Task.Delay plus CancellationToken.Register — there is no counterpart
- * file under Runtime/ because the BCL supplies both.
+ * The two async primitives this package would otherwise spell out at every call site. runtime has no
+ * counterpart file because CompletableFuture supplies both.
  *
- * AbortSignal is this port's CancellationToken throughout, so everything that takes an optional
- * `{ signal }` bounds the wait exactly the way a trailing CancellationToken does on the C# side —
- * including the contract that *no* signal means no implicit timeout, which is deliberate in both:
+ * AbortSignal is the cancellation carrier throughout, so everything that takes an optional
+ * `{ signal }` bounds the wait with it — including the contract that *no* signal means no implicit
+ * timeout, which is deliberate:
  * bounding a registration or a request is the caller's choice to make.
  */
 

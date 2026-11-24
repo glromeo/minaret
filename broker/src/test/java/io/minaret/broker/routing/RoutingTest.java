@@ -30,9 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The wire-level half of Broker.Tests' ChannelRegistryTests: dispatch, publish and notify routing
- * through real Sessions. A "seeded" socket is a recipient entered into the registry with no
- * handshake, as the C# tests' SeedConnection.
+ * ChannelRegistry at the wire level: dispatch, publish and notify routing through real Sessions. A
+ * "seeded" socket is a recipient entered into the registry with no handshake.
  */
 class RoutingTest {
 

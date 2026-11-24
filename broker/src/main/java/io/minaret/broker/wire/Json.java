@@ -39,7 +39,7 @@ public final class Json {
 
     /**
      * frame's body deserialized as type, inflated first when it arrived gzipped, or null when it is
-     * empty, undecodable or invalid for type. This is the null C#'s TryParseBody answers false for.
+     * empty, undecodable or invalid for type.
      * It also catches a record constructor's required-field check.
      */
     public <T> T read(Frame frame, Class<T> type) {

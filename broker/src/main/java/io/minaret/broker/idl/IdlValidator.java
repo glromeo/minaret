@@ -5,12 +5,11 @@ import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Singleton;
 
 /**
- * Checks an IDL document's envelope, the port of C#'s IdlValidator: an array of channels, each with
+ * Checks an IDL document's envelope: an array of channels, each with
  * a non-empty name and at least one topic. The grammar below that is the editor's
  * (Monitoring/src/idl/), deliberately not duplicated here.
  *
- * The messages are C#'s, word for word, except a parse failure's, which is the parser's own:
- * Jackson's here, System.Text.Json's there.
+ * A parse failure's message is Jackson's own.
  */
 @Singleton
 public final class IdlValidator {

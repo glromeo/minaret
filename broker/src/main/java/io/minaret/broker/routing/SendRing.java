@@ -12,7 +12,7 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * One connection's outbound half, the port of C#'s SendQueue. Every frame for this socket goes
+ * One connection's outbound half. Every frame for this socket goes
  * through it: the session's own acks, and every other session's forwards and fanouts.
  *
  * Any thread may enqueue, without locking: an MPSC queue plus one long-lived drain task. The first
@@ -20,11 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * execute and no per-frame lambda. The drain writes everything with the void promise and flushes
  * once.
  *
- * A slow consumer stays a local problem, as in C#. A producer never touches the socket, and the
+ * A slow consumer stays a local problem. A producer never touches the socket, and the
  * backlog is bounded at CAPACITY with drop-oldest, so a consumer that stops reading sheds its own
  * backlog. The bound counts frames still in this queue. Netty's outbound buffer, gated by channel
- * writability, holds the frames already handed to the socket, which is where C#'s socket send buffer
- * sits.
+ * writability, holds the frames already handed to the socket.
  *
  * Ownership of each buffer passes to the ring on enqueue. The ring releases it by writing it
  * (Netty releases after the write), by dropping it, or by discarding it once the channel is gone.
@@ -65,7 +64,7 @@ final class SendRing {
 
     /**
      * Writes what is queued, then closes the socket as superseded (4001) with reason. Further
-     * enqueues are dropped. This is CloseAsync in C#: drain, then close.
+     * enqueues are dropped: drain, then close.
      */
     void close(String reason) {
         closeReason = reason;
