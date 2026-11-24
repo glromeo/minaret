@@ -1,0 +1,18 @@
+modelVersion: 4.0.0
+
+parent:
+  groupId: io.minaret
+  artifactId: examples
+  version: 0.1.0-SNAPSHOT
+  relativePath: ../pom.yml
+
+artifactId: layer0
+packaging: jar
+
+name: "Minaret :: Examples :: Layer 0"
+description: >
+  Echo over direct routing: the provider registers under a hardcoded RouteId and the client addresses
+  it by that id, with no channels.
+
+properties:
+  exec.mainClass: io.minaret.examples.layer0.Main

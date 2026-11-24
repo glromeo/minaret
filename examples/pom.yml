@@ -1,0 +1,26 @@
+modelVersion: 4.0.0
+
+parent:
+  groupId: io.minaret
+  artifactId: minaret
+  version: 0.1.0-SNAPSHOT
+  relativePath: ../pom.yml
+
+artifactId: examples
+packaging: pom
+
+name: "Minaret :: Examples"
+description: >
+  Runnable echo round-trips against a live broker, one module per layer.
+
+modules:
+  - layer0
+  - layer1
+
+dependencies:
+  - groupId: io.minaret
+    artifactId: runtime
+
+build:
+  plugins:
+    - artifactId: maven-compiler-plugin

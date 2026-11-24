@@ -1,0 +1,25 @@
+target/
+
+# Written by polyglot-yaml on every build: the XML model it translates pom.yml into.
+.polyglot.pom.yml
+
+# Generated from pom.yml for IntelliJ, which only reads pom.xml (see CLAUDE.md "IDE import"). Not
+# the source of truth: regenerate after editing pom.yml.
+pom.xml
+
+.idea/
+*.iml
+
+node_modules/
+*.tsbuildinfo
+
+# monitoring's Vite build output: `npm run build` renders this whole directory, so it is generated
+# rather than authored. The rest of wwwroot stays tracked.
+/broker/wwwroot/monitor/
+
+# The IDL repository's development store: a scratch pad the API editor writes to on every save. A
+# deployment's store is worth committing; this one is not.
+/broker/idl/
+
+# The local dev certificate and its private key (see CLAUDE.md "Dev certificate").
+/broker/devcert.pfx

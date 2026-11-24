@@ -1,0 +1,90 @@
+modelVersion: 4.0.0
+
+# Not io.minaret:minaret: the broker leans on micronaut-parent's plugin and annotation-processor
+# management, and a POM has one parent. The root lists it as a module only.
+parent:
+  groupId: io.micronaut.platform
+  artifactId: micronaut-parent
+  version: 4.10.18
+
+groupId: io.minaret
+artifactId: broker
+version: 0.1.0-SNAPSHOT
+packaging: jar
+
+name: "Minaret :: Broker"
+description: >
+  The broker, on Micronaut + raw Netty: routing, channels, events and the IDL repository, with no
+  allocation per relayed frame.
+
+properties:
+  project.build.sourceEncoding: UTF-8
+  maven.compiler.release: 17
+  jdk.version: 17
+  release.version: 17
+  micronaut.version: 4.10.18
+  micronaut.runtime: netty
+  exec.mainClass: io.minaret.broker.Application
+  jna.version: 5.17.0
+
+dependencies:
+  - groupId: io.micronaut
+    artifactId: micronaut-http-server-netty
+  - groupId: io.micronaut.serde
+    artifactId: micronaut-serde-jackson
+  # Creates the discovery pipe. The JDK can open a named pipe as a file (which is all a client needs)
+  # but has no API to create one, and JDK 17 has no final FFM.
+  - groupId: net.java.dev.jna
+    artifactId: jna-platform
+    version: ${jna.version}
+  # BrokerMetrics' instruments. Add a micronaut-micrometer-registry-* module to export them.
+  - groupId: io.micronaut.micrometer
+    artifactId: micronaut-micrometer-core
+  - groupId: org.yaml
+    artifactId: snakeyaml
+    scope: runtime
+  - groupId: ch.qos.logback
+    artifactId: logback-classic
+    scope: runtime
+
+  - groupId: io.micronaut.test
+    artifactId: micronaut-test-junit5
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter-engine
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter-params
+    scope: test
+  # The e2e driver and frame builder: a real client codec against this broker, resolved in-reactor.
+  - groupId: io.minaret
+    artifactId: runtime
+    version: ${project.version}
+    scope: test
+
+build:
+  plugins:
+    # Versions pinned to what micronaut-parent ${micronaut.version} manages: IDEA's pom.yml sync doesn't
+    # apply the parent's pluginManagement. Re-check them when bumping the parent.
+    - groupId: io.micronaut.maven
+      artifactId: micronaut-maven-plugin
+    - artifactId: maven-compiler-plugin
+      configuration:
+        annotationProcessorPaths:
+          - groupId: io.micronaut
+            artifactId: micronaut-inject-java
+            version: ${micronaut.core.version}
+          - groupId: io.micronaut.serde
+            artifactId: micronaut-serde-processor
+            version: ${micronaut.serialization.version}
+            exclusions:
+              - groupId: io.micronaut
+                artifactId: micronaut-inject
+        compilerArgs:
+          - -Amicronaut.processing.group=io.minaret
+          - -Amicronaut.processing.module=broker
+    - artifactId: maven-surefire-plugin
+      configuration:
+        # Paranoid leak detection: every frame here is a pooled direct buffer with a manual refcount,
+        # and a missed release is invisible until the pool is exhausted in production.
+        argLine: -Dio.netty.leakDetection.level=paranoid

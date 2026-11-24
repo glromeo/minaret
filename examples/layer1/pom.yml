@@ -1,0 +1,18 @@
+modelVersion: 4.0.0
+
+parent:
+  groupId: io.minaret
+  artifactId: examples
+  version: 0.1.0-SNAPSHOT
+  relativePath: ../pom.yml
+
+artifactId: layer1
+packaging: jar
+
+name: "Minaret :: Examples :: Layer 1"
+description: >
+  Echo over a channel: the provider claims the name LAYER_1, the client resolves it, and replies come
+  back over the echo topic in send order.
+
+properties:
+  exec.mainClass: io.minaret.examples.layer1.Main

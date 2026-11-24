@@ -1,0 +1,1853 @@
+/*
+ * Dark by default — a monitor is a wall display, and a dark field makes the graph's own colour the
+ * only bright thing on screen.
+ */
+:root {
+    /* Surfaces */
+    --bg: #0b0e14;
+    --panel: #11141c;
+    --panel-raised: #181c26;
+    --edge: #1c212c;
+    --border-raised: #262c39;
+    --accent: #5b8fd6;
+
+    /* Text */
+    --ink: #eef1f6;
+    --ink-secondary: #a7b2c4;
+    --muted: #5b6779;
+    --link: #5b8fd6;
+
+    /* Node type palette */
+    --node-provider: #5b8fd6;
+    --node-client: #5bc78e;
+    --node-topic: #c78e5b;
+    --node-broker: #a685e0;
+    --node-dead-letter: #e05b7a;
+    --node-idle: #5b6779;
+
+    /* Traffic dots (graph/traffic.ts). Held apart from the --node-* ramp on purpose: those colour
+       what a thing *is* and stay on screen, these colour a direction and are gone in half a second,
+       so they are the two brightest values on the canvas and belong to nothing else on it. */
+    --traffic-out: #f0cf3f;
+    --traffic-in: #b47bf0;
+
+    /* Status / severity */
+    --status-healthy: #5bc78e;
+    --status-warning: #e0b95b;
+    --status-error: #e05b5b;
+    --status-offline: #3a4152;
+
+    /* Legacy aliases still used by markup below */
+    --broker-light: #8fb3e8;
+    --client: var(--node-client);
+    --error: var(--status-error);
+
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 48px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--edge);
+    background: var(--panel-raised);
+}
+
+.header-spacer {
+    flex: 1;
+}
+
+.header-count {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* --- View toggles (TopNav) ---
+
+   One inset well holding all four, so the set reads as a single control beside the wordmark rather
+   than as four buttons that happen to be adjacent — the well is `--panel` on `--panel-raised`, i.e.
+   a step *down* from the header, which is what makes the group look recessed and its active member
+   look raised out of it. */
+.nav-toggles {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    margin-left: -3px;
+    border: 1px solid var(--border-raised);
+    border-radius: 8px;
+    background: var(--panel);
+}
+
+.nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 28px;
+    padding: 0 11px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink-secondary);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nav-toggle:hover {
+    background: var(--edge);
+    color: var(--ink);
+}
+
+/* `--bg` on `--accent`, not `--ink`: the accent is light enough that white text on it is the one
+   place in this UI where the contrast drops, and the page background is already the darkest value
+   to hand. The hover rule is repeated because the one above would otherwise win on specificity
+   order and make an active pane look inactive under the cursor. */
+.nav-toggle--on,
+.nav-toggle--on:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.nav-toggle svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+
+.nav-divider {
+    width: 1px;
+    height: 22px;
+    flex-shrink: 0;
+    background: var(--border-raised);
+}
+
+/* Narrow window: the labels go and the icons stay, since four of them plus the wordmark, the count
+   and the LIVE pill is more than a half-width window has room for. The label stays in the DOM — the
+   button keeps its accessible name and its tooltip either way. */
+@media (max-width: 900px) {
+    .nav-toggle {
+        width: 32px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .nav-toggle-label {
+        display: none;
+    }
+}
+
+h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.status {
+    padding: 2px 10px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: lowercase;
+}
+
+.status--open {
+    color: var(--client);
+    border-color: currentColor;
+}
+
+.status--closed {
+    color: var(--error);
+    border-color: currentColor;
+}
+
+.error {
+    margin: 0;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--error) 15%, transparent);
+    color: var(--error);
+    font-size: 13px;
+}
+
+.canvas-stack {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+}
+
+.graph-container {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+}
+
+.graph {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    background: var(--bg);
+    touch-action: none;
+    user-select: none;
+}
+
+.graph:active {
+    cursor: grabbing;
+}
+
+.graph-toolbar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+}
+
+.graph-tool {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border-raised);
+    background: var(--panel-raised);
+    color: var(--ink-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.graph-tool:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Stroke-on-currentColor so one hover rule colours the whole icon set (see BusGraph's toolbar). */
+.graph-tool svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --- Dynamic node hover popover (edit/delete) --- */
+
+/* Anchored at the node's top edge in .graph-container space (see BusGraph's toContainerSpace),
+   centred horizontally and sitting just above it — translate rather than baking the offset into
+   left/top so it stays centred regardless of the popover's own width. */
+.node-popover {
+    position: absolute;
+    transform: translate(-50%, -100%) translateY(-8px);
+    z-index: 4;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--border-raised);
+    background: var(--panel-raised);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+}
+
+.node-popover-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: var(--panel);
+    color: var(--ink-secondary);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.node-popover-edit:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.node-popover-delete:hover {
+    background: #e81123;
+    color: #fff;
+}
+
+.node-popover-view:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.node-popover-btn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --- Dynamic node floating windows --- */
+
+.node-window {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    border: 1px solid var(--border-raised);
+    background: var(--panel);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Maximize fills the graph area (.graph-container, its positioned ancestor) rather than the
+   viewport — it's a pane within the app, not the whole page. */
+.node-window--maximized {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0;
+}
+
+.node-window-bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 0 0 0 8px;
+    background: var(--panel-raised);
+    border-bottom: 1px solid var(--edge);
+    cursor: grab;
+    user-select: none;
+}
+
+.node-window-bar:active {
+    cursor: grabbing;
+}
+
+.node-window-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.node-window-controls {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    /* Own pointerdown listener so a click here never starts the title-bar drag (see onDragTitleBar's
+       .node-window-controls check) and never bubbles into bringToFront's stacking dance mid-click. */
+}
+
+.node-window-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    width: 34px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+}
+
+.node-window-btn:hover {
+    background: var(--border-raised);
+    color: var(--ink);
+}
+
+.node-window-close:hover {
+    background: #e81123;
+    color: #fff;
+}
+
+/* Plain outlined squares rather than the Unicode ⬜/⬔ glyphs — those render filled/emoji-styled on
+   several platform fonts, which reads as the wrong (already-maximized) state. */
+.node-window-icon-maximize {
+    width: 10px;
+    height: 10px;
+    border: 1.4px solid currentColor;
+}
+
+/* Two overlapping squares (Windows-11's "restore down" glyph) rather than maximize's single square —
+   sized/offset within a fixed box so flex-centering the button lays out the whole glyph as one unit
+   instead of shifting the ::before relative to a flow position that centering has already changed.
+   The offset has to be a large fraction of the square's own size (here: half) — at icon scale a
+   subtle few-percent stagger reads as a single square, not two. */
+.node-window-icon-restore {
+    position: relative;
+    width: 13px;
+    height: 13px;
+}
+
+.node-window-icon-restore::before,
+.node-window-icon-restore::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 1.4px solid currentColor;
+}
+
+.node-window-icon-restore::before {
+    top: 0;
+    right: 0;
+    background: var(--panel-raised);
+}
+
+.node-window-icon-restore::after {
+    bottom: 0;
+    left: 0;
+    background: var(--panel-raised);
+}
+
+.node-window-btn:hover .node-window-icon-restore::before,
+.node-window-btn:hover .node-window-icon-restore::after {
+    background: var(--border-raised);
+}
+
+.node-window-close:hover .node-window-icon-restore::before,
+.node-window-close:hover .node-window-icon-restore::after {
+    background: #e81123;
+}
+
+.node-window-frame {
+    flex: 1;
+    min-height: 0;
+    border: none;
+    width: 100%;
+}
+
+/* --- API editor windows --- */
+
+/* The strip between the title bar and the editor: what the document is called, and what the
+   repository knows about it. Fixed height (no flex growth) so the editor keeps the rest. */
+.api-window-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    background: var(--panel-raised);
+    border-bottom: 1px solid var(--edge);
+    font-size: 11px;
+}
+
+.api-window-name {
+    flex: 0 1 160px;
+    min-width: 60px;
+    padding: 2px 5px;
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--border-raised);
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+}
+
+.api-window-name:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.api-window-name--invalid {
+    border-color: var(--status-error);
+}
+
+.api-window-ext {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    margin-left: -3px;
+}
+
+.api-window-action {
+    padding: 3px 9px;
+    background: var(--panel);
+    color: var(--ink-secondary);
+    border: 1px solid var(--border-raised);
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.api-window-action:hover:not(:disabled) {
+    background: var(--edge);
+    color: var(--ink);
+}
+
+.api-window-action:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Only the armed second click of a delete is coloured, so the control reads as harmless until it
+   isn't — see ApiWindow.tsx. */
+.api-window-action--danger {
+    background: var(--status-error);
+    border-color: var(--status-error);
+    color: #fff;
+}
+
+/* The status ellipsizes rather than wraps: a Broker error message can be a sentence, and a toolbar
+   that grew a second line would push the editor down every time a save failed. The full text is on
+   the element's own title. */
+.api-window-status {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: right;
+    color: var(--muted);
+}
+
+.api-window-status--error {
+    color: var(--status-error);
+}
+
+/* CodeMirror sizes itself to its parent only when that parent has a definite height, which inside
+   a flex column means flex:1 + min-height:0 — without the latter the editor's own scroll height
+   becomes the flex base and the window grows past its dragged size instead of scrolling. */
+.api-window-editor {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.api-window-editor .cm-editor {
+    height: 100%;
+    font-size: 12px;
+}
+
+/* The one-dark theme paints its own surfaces; overriding the two that meet the window chrome is
+   what stops a visible seam between the editor and the title bar above it. */
+.api-window-editor .cm-editor .cm-scroller {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    line-height: 1.5;
+}
+
+.api-window-editor .cm-editor,
+.api-window-editor .cm-editor .cm-gutters {
+    background: var(--panel);
+}
+
+.api-window-editor .cm-editor.cm-focused {
+    outline: none;
+}
+
+/* Completion/diagnostic tooltips are hoisted to <body> to escape the window's overflow clip (see
+   ApiWindow.tsx), which puts them outside .api-window-editor's reach — so they are styled here, at
+   the same specificity the theme uses, to keep them on the app's own surfaces. */
+.cm-tooltip.cm-tooltip-autocomplete > ul {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    max-height: 16em;
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cm-tooltip .cm-completionDetail {
+    color: var(--muted);
+    font-style: normal;
+    margin-left: 8px;
+}
+
+/* The `info` panel carries the schema's own `description`, which is prose — the monospace of the
+   list beside it would set it as code. */
+.cm-tooltip.cm-completionInfo {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    max-width: 320px;
+    border: 1px solid var(--border-raised);
+    background: var(--panel-raised);
+    color: var(--ink-secondary);
+    padding: 6px 8px;
+    line-height: 1.45;
+}
+
+/* --- External node windows (ExternalNodeApp.tsx) --- */
+
+.ext-node {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ext-node-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--ink-secondary);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.ext-node-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--status-offline); flex-shrink: 0; }
+.ext-node-dot--open { background: var(--status-healthy); }
+.ext-node-dot--connecting { background: var(--status-warning); }
+.ext-node-dot--closed { background: var(--status-error); }
+
+.ext-node-error {
+    background: rgba(224, 91, 91, 0.15);
+    color: var(--status-error);
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    word-break: break-word;
+    flex-shrink: 0;
+}
+
+.ext-node-empty { color: var(--muted); font-size: 11px; }
+
+.ext-node-accordion { display: flex; flex-direction: column; gap: 6px; }
+
+.ext-node-acc-item {
+    border: 1px solid var(--border-raised);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.ext-node-acc-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: var(--panel-raised);
+    cursor: pointer;
+}
+
+.ext-node-acc-caret { color: var(--muted); line-height: 0; width: 15px; scale: 1.5; flex-shrink: 0; }
+.ext-node-acc-title { flex: 1; font-weight: 600; }
+.ext-node-acc-body { padding: 8px; border-top: 1px solid var(--border-raised); }
+
+.ext-node-topics { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+
+.ext-node-chip {
+    background: rgba(91, 143, 214, 0.18);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.ext-node-chip:hover { border-color: var(--accent); }
+.ext-node-chip--selected { background: var(--accent); color: #fff; }
+
+.ext-node-row { display: flex; gap: 6px; margin-bottom: 6px; }
+
+.ext-node-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--panel-raised);
+    border: 1px solid var(--border-raised);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 5px 7px;
+    font: inherit;
+}
+
+.ext-node-button {
+    background: var(--border-raised);
+    border: 1px solid var(--border-raised);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font: inherit;
+    flex-shrink: 0;
+}
+
+.ext-node-button:hover { border-color: var(--accent); }
+.ext-node-button:disabled { opacity: 0.4; cursor: default; }
+
+.ext-node-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 5px;
+}
+
+.ext-node-log { max-height: 100px; overflow-y: auto; border: 1px solid var(--border-raised); border-radius: 4px; }
+
+.ext-node-log-row {
+    padding: 2px 6px;
+    border-bottom: 1px solid var(--edge);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 9px;
+    color: var(--ink-secondary);
+    word-break: break-all;
+}
+
+.node-window-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    /* A corner wedge in the muted border color, visible without competing with the iframe content. */
+    background: linear-gradient(135deg, transparent 50%, var(--border-raised) 50%);
+}
+
+.node-window-resize:hover {
+    background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+}
+
+/* Edges: solid = confirmed live topology (every edge here is a client actually connected right
+   now — the graph never draws an inferred/idle edge, since there's nothing to infer it from). */
+.edge {
+    stroke: var(--status-offline);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke 120ms ease-out, stroke-width 120ms ease-out, opacity 120ms ease-out;
+}
+
+.edge--active {
+    stroke: var(--broker-light);
+    stroke-width: 2;
+}
+
+.edge--dimmed {
+    opacity: 0.3;
+}
+
+.channel-link {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+    fill: none;
+    opacity: 0.5;
+    transition: stroke-width 120ms ease-out, opacity 120ms ease-out;
+}
+
+.channel-link--active {
+    stroke-width: 2;
+    opacity: 0.9;
+}
+
+.channel-link--dimmed {
+    opacity: 0.15;
+}
+
+.topic-link {
+    stroke: var(--accent);
+    stroke-width: 1;
+    stroke-dasharray: 1.5 3;
+    stroke-linecap: round;
+    fill: none;
+    opacity: 0.45;
+    transition: stroke-width 120ms ease-out, opacity 120ms ease-out;
+}
+
+.topic-link--active {
+    stroke-width: 1.5;
+    opacity: 0.9;
+}
+
+.topic-link--dimmed {
+    opacity: 0.12;
+}
+
+.broker-node {
+    fill: color-mix(in srgb, var(--node-broker) 18%, transparent);
+    stroke: var(--node-broker);
+    stroke-width: 2;
+}
+
+.broker-label {
+    fill: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.broker-sub {
+    fill: var(--muted);
+    font-size: 12px;
+    text-anchor: middle;
+}
+
+/* Node anatomy: fill at 15-25% of the type color, stroke at full color — keeps dense graphs
+   readable per the guideline.
+
+   `transform` is deliberately absent from the transition, here and on `.spike-node`: the hover scale
+   below is matched in JS by `drawnRadiusOf`, which re-trims every edge to the grown rim on the frame
+   hover starts. Easing the scale over 120ms while the line ends have already moved would show the
+   gap between them for the whole grow-in. */
+.client .client-node {
+    fill: color-mix(in srgb, var(--node-client) 20%, transparent);
+    stroke: var(--node-client);
+    stroke-width: 1.5;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: stroke-width 120ms ease-out, opacity 120ms ease-out;
+    /* Only the node reacts to the pointer; the label would otherwise flicker the hover on and off
+       as the cursor crossed the gap between them. */
+    cursor: pointer;
+}
+
+.client--provider .client-node {
+    fill: color-mix(in srgb, var(--node-provider) 20%, transparent);
+    stroke: var(--node-provider);
+}
+
+/* The monitor's own connection — distinguished so an operator recognises "me" without reading the
+   RouteId, using the same broker-purple family since both are locally-known, trusted vantage points. */
+.client--self .client-node {
+    fill: color-mix(in srgb, var(--node-broker) 20%, transparent);
+    stroke: var(--node-broker);
+    stroke-dasharray: 3 2;
+}
+
+/* Hover only, not `:focus-visible` as well: the growth has to be mirrored in JS by `drawnRadiusOf`,
+   which reads the `hovered` signal and has no way to see focus. A focused node that grew would pull
+   its rim out from under every edge meeting it; the outline below names the focused node instead. */
+.client:hover .client-node {
+    transform: scale(1.12);
+}
+
+.client:focus-visible .client-node {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.client--selected .client-node {
+    stroke-width: 2.5;
+}
+
+.client--selected {
+    color: var(--accent);
+}
+
+.client-center-dot {
+    fill: var(--ink);
+    pointer-events: none;
+}
+
+.client {
+    cursor: grab;
+    /* On the group, so a node fading in or out of the connected state carries its label with it —
+       .client-node's own transition only covers the circle. */
+    transition: opacity 160ms ease-out;
+}
+
+.client--dragging {
+    cursor: grabbing;
+}
+
+.client--dragging .client-node {
+    stroke-dasharray: 3 2;
+    opacity: 0.85;
+}
+
+.client--dimmed {
+    opacity: 0.3;
+}
+
+/* A node whose window is away is still fully on the bus, so it keeps the solid ring of any other
+   connected client — the corner badge is what says the window is tucked away. It used to carry a
+   dashed stroke, which now reads as the opposite of what it means: a broken ring is how
+   .client--pending says "not connected", and one cue cannot carry both. */
+
+/* Not on the bus: added but not registered yet, dropped and reconnecting, or closing and waiting for
+   the Broker to confirm it went (see graph/dynamicNodes.ts). Transparency rather than a different
+   colour, so the state reads as "not fully there" at a glance and needs no legend — and it applies
+   to the group, so the label fades with the circle. The .client-node transition already covers
+   opacity, so arriving and departing are both a fade rather than a pop. */
+.client--pending {
+    opacity: 0.4;
+}
+
+.client--pending .client-node {
+    stroke-dasharray: 2 3;
+}
+
+/* Same reasoning for the orbit edge — a solid line to a ghost node would read as a live link. */
+.edge--pending {
+    stroke-dasharray: 2 4;
+    opacity: 0.35;
+}
+
+.client-minimized-badge {
+    cursor: pointer;
+}
+
+.client-minimized-badge circle {
+    fill: var(--panel-raised);
+    stroke: var(--muted);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.client-minimized-badge text {
+    font-size: 8px;
+    text-anchor: middle;
+    fill: var(--ink-secondary);
+    pointer-events: none;
+}
+
+.client-minimized-badge:hover circle {
+    stroke: var(--accent);
+    fill: var(--panel);
+}
+
+.client-minimized-badge:hover text {
+    fill: var(--accent);
+}
+
+.client-label {
+    fill: var(--muted);
+    font-size: 11px;
+    text-anchor: middle;
+    pointer-events: none;
+    transition: fill 120ms ease-out, font-size 120ms ease-out;
+}
+
+.client:hover .client-label,
+.client--selected .client-label {
+    fill: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Virus spikes: the channel/topic satellites a dynamic node grows (see graph/virusTree.ts).
+   Thinner than an orbit edge so a spike reads as a rigid protrusion rather than another
+   star-topology link. */
+.edge--spike {
+    stroke-width: 1;
+    opacity: 0.7;
+}
+
+.spike-node {
+    fill: color-mix(in srgb, var(--node-provider) 22%, transparent);
+    stroke: var(--node-provider);
+    stroke-width: 1.25;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: stroke-width 120ms ease-out, opacity 120ms ease-out;
+    cursor: grab;
+}
+
+.spike--client .spike-node {
+    fill: color-mix(in srgb, var(--node-client) 22%, transparent);
+    stroke: var(--node-client);
+}
+
+.spike--topic .spike-node {
+    fill: color-mix(in srgb, var(--node-topic) 25%, transparent);
+    stroke: var(--node-topic);
+}
+
+.spike:hover .spike-node,
+.spike--selected .spike-node {
+    transform: scale(1.2);
+}
+
+.spike--selected .spike-node {
+    stroke-width: 2;
+}
+
+.spike--dimmed {
+    opacity: 0.3;
+}
+
+.spike-label {
+    fill: var(--muted);
+    font-size: 9.5px;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+/* Traffic dots: one per message a dynamic node sends (yellow, outbound) or receives (purple,
+   inbound), travelling the edges between it and the Broker — see graph/traffic.ts for why the only
+   traffic this app can see is its own nodes'.
+
+   pointer-events: none because a dot crosses every node on its path and must never take a hover
+   from one; the graph's dimming is driven off `hovered`, so a dot stealing it would flicker the
+   whole canvas as it passed. The glow is drop-shadow of currentColor rather than a per-direction
+   filter, so the two rules below set one property each. */
+.pulse {
+    fill: currentColor;
+    pointer-events: none;
+    filter: drop-shadow(0 0 3px currentColor);
+}
+
+.pulse--out {
+    color: var(--traffic-out);
+}
+
+.pulse--in {
+    color: var(--traffic-in);
+}
+
+.spike-label--topic {
+    font-size: 8.5px;
+}
+
+.spike:hover .spike-label,
+.spike--selected .spike-label {
+    fill: var(--ink);
+    font-weight: 600;
+}
+
+.live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--muted) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+}
+
+.live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.live-pill--open {
+    color: var(--status-healthy);
+    background: color-mix(in srgb, var(--status-healthy) 10%, transparent);
+    border-color: color-mix(in srgb, var(--status-healthy) 20%, transparent);
+}
+
+.live-pill--open .live-dot {
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+.live-pill--closed {
+    color: var(--status-error);
+    background: color-mix(in srgb, var(--status-error) 10%, transparent);
+    border-color: color-mix(in srgb, var(--status-error) 20%, transparent);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+/* --- Canvas row, resizable sidebar --- */
+
+.canvas-row {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.sidebar {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--panel);
+}
+
+.sidebar-top {
+    flex-shrink: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sidebar-bottom {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+/* --- Panel header (PanelHeader) ---
+
+   One strip for every docked panel, so the three read as a set: a fixed-width name, then a field
+   that takes whatever is left. The field is `--bg` inside a `--panel` dock — a step *down*, matching
+   the recessed treatment `.nav-toggles` uses in the header — so it reads as somewhere to type
+   without needing a permanent border to say so. */
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    height: 34px;
+    padding: 0 8px 0 12px;
+    border-bottom: 1px solid var(--edge);
+}
+
+/* Grows, so the field is pushed to the right edge and sits at the same distance from it in all
+   three panels — the one alignment that survives the titles being different lengths. */
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+}
+
+.panel-title svg {
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-block-end: 0.25em;
+}
+
+/* The label is what yields when a dock is dragged narrow — it truncates rather than pushing the
+   field, which holds its width below. The icon beside it stays whole at any width, so the panel is
+   still named even once the text has been eaten. */
+.panel-title-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Fixed rather than fluid, and `flex-shrink: 0` so it stays that way: a filter term is a word, not
+   a sentence, so past ~124px the field only takes room from the title, and squeezed under it the
+   field stops showing what was typed into it. The title yields instead — it has somewhere to go
+   (ellipsis, above) and the field has not. */
+.panel-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    width: 124px;
+    height: 24px;
+    padding: 0 6px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--muted);
+}
+
+.panel-search:focus-within {
+    border-color: var(--accent);
+    color: var(--ink-secondary);
+}
+
+.panel-search svg {
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.panel-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 12px;
+    outline: none;
+}
+
+.panel-search input::placeholder {
+    color: var(--muted);
+}
+
+/* The UA's own clear affordance is suppressed in favour of the button below — WebKit's sits
+   outside the field's colour scheme and appears at a different moment than ours does. */
+.panel-search input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.panel-search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.panel-search-clear:hover {
+    background: var(--edge);
+    color: var(--ink);
+}
+
+/* --- Repository dock (RepositoryTree) ---
+
+   The left-hand twin of `.sidebar`: same panel surface, same Splitter, mirrored border. Its own
+   class rather than a shared one because only the edge they hang off is common — this one holds a
+   tree at full height where the sidebar stacks two panes against a horizontal seam. */
+.repository-dock {
+    flex-shrink: 0;
+    display: flex;
+    min-height: 0;
+    background: var(--panel);
+}
+
+.repository {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--edge);
+}
+
+/* One rule for the dock's whole icon set — chevron, folder, plus — the same stroke-on-currentColor
+   choice `.graph-tool` documents, which is what lets the active row recolour icon and label at once. */
+.repository svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.repository-tree {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 0;
+}
+
+.repository-row {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    margin: 0 6px;
+    border-radius: 6px;
+    color: var(--ink);
+}
+
+.repository-row:hover {
+    background: var(--edge);
+}
+
+/* Filled exactly as an active nav toggle is, and for the same reason: across this app a filled
+   control means "the thing this names is on screen right now". Here that thing is the editor. */
+.repository-row--active,
+.repository-row--active:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.repository-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: transform 120ms ease-out;
+}
+
+.repository-chevron--open {
+    transform: rotate(90deg);
+}
+
+.repository-row--active .repository-chevron {
+    color: inherit;
+}
+
+.repository-name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 10px 0 3px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.repository-row--active .repository-name {
+    font-weight: 500;
+}
+
+.repository-folder {
+    flex-shrink: 0;
+    color: var(--ink-secondary);
+}
+
+.repository-row--active .repository-folder {
+    color: inherit;
+}
+
+.repository-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.repository-dirty {
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--node-topic);
+}
+
+.repository-row--active .repository-dirty {
+    background: var(--bg);
+    opacity: 0.55;
+}
+
+.repository-children {
+    padding: 2px 6px 6px 27px;
+}
+
+.repository-channel {
+    padding-bottom: 4px;
+}
+
+.repository-channel-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 22px;
+    color: var(--ink-secondary);
+    font-size: 12px;
+}
+
+.repository-channel-head svg {
+    flex-shrink: 0;
+    color: var(--node-topic);
+}
+
+.repository-channel .repository-participant,
+.repository-channel .repository-empty,
+.repository-channel .repository-forget {
+    margin-left: 8px;
+}
+
+/* One rule dims pill, name and details together — a half-dimmed row would read as a live client
+   whose details happen to be grey. */
+.repository-participant--offline {
+    opacity: 0.45;
+}
+
+.repository-participant-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.repository-participant-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Same tag as `node-app-role-tag`, plus a border so it reads as a control. The role colours live on
+   `--on` alone: an offline row keeps the neutral tag whatever its role, so colour means "on the
+   bus" and the word means "which role", rather than both trying to say both. */
+.repository-pill {
+    flex-shrink: 0;
+    padding: 3px 7px;
+    border: 1px solid var(--border-raised);
+    border-radius: 999px;
+    background: rgba(167, 178, 196, 0.12);
+    color: var(--ink-secondary);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.repository-pill--on.repository-pill--provider {
+    border-color: color-mix(in srgb, var(--node-provider) 50%, transparent);
+    background: color-mix(in srgb, var(--node-provider) 18%, transparent);
+    color: var(--node-provider);
+}
+
+.repository-pill--on.repository-pill--client {
+    border-color: color-mix(in srgb, var(--node-client) 50%, transparent);
+    background: color-mix(in srgb, var(--node-client) 18%, transparent);
+    color: var(--node-client);
+}
+
+.repository-details {
+    margin: 1px 0 5px 22px;
+    padding-left: 12px;
+    border-left: 1px solid var(--edge);
+}
+
+.repository-detail {
+    display: flex;
+    gap: 8px;
+    padding: 1px 0;
+    font-size: 11px;
+}
+
+.repository-detail dt {
+    flex-shrink: 0;
+    width: 74px;
+    color: var(--muted);
+}
+
+.repository-detail dd {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ink-secondary);
+}
+
+.repository-detail--mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.repository-empty {
+    padding: 4px 12px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.repository-forget {
+    margin: 2px 0 0 22px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.repository-forget:hover {
+    color: var(--status-error);
+}
+
+/* Drag handles: a thin hit target that grows a visible bar only under hover/active, so the
+   resizable seams don't read as permanent UI chrome the rest of the time. */
+.splitter {
+    flex-shrink: 0;
+    background: transparent;
+    position: relative;
+}
+
+.splitter::after {
+    content: "";
+    position: absolute;
+    background: var(--edge);
+    transition: background 120ms ease-out;
+}
+
+.splitter:hover::after,
+.splitter:active::after {
+    background: var(--accent);
+}
+
+.splitter--x {
+    width: 5px;
+    cursor: col-resize;
+}
+
+.splitter--x::after {
+    inset: 0 2px;
+}
+
+.splitter--y {
+    height: 5px;
+    cursor: row-resize;
+}
+
+.splitter--y::after {
+    inset: 2px 0;
+}
+
+/* A column with its own scrolling body, so the header stays put while the detail scrolls under it —
+   the same shape `.repository` and `.log-viewer` have, which is what lets one header sit in all
+   three. `.sidebar-top` is `overflow: hidden` for the matching reason. */
+.inspector {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--edge);
+}
+
+.inspector-body {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.inspector-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+    word-break: break-word;
+}
+
+.inspector-sub {
+    font-size: 12px;
+    color: var(--ink-secondary);
+}
+
+.inspector-empty {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.inspector-divider {
+    height: 1px;
+    background: var(--edge);
+    margin: 12px 0;
+}
+
+.inspector-card {
+    border-radius: 4px;
+    padding: 8px 0;
+}
+
+.inspector-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+
+.inspector-value {
+    font-size: 13px;
+    color: var(--ink-secondary);
+}
+
+.inspector-value--mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    word-break: break-all;
+}
+
+/*
+ * A value with a trailing copy button. The text keeps `word-break: break-all` from --mono, so it
+ * needs `min-width: 0` to be allowed to wrap instead of forcing the row wider than the panel.
+ */
+.inspector-value--copyable {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.inspector-value--copyable > span {
+    flex: 1;
+    min-width: 0;
+}
+
+.inspector-prop {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    padding: 2px 0;
+}
+
+.inspector-prop-key {
+    color: var(--muted);
+}
+
+.inspector-prop-value {
+    color: var(--ink-secondary);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* A channel/topic tree, in the main client panel's "Channels" card — click either level to select
+   the matching graph satellite (see channelBodyId/topicBodyId), consistent with clicking it on the
+   canvas directly. */
+.channel-tree {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.channel-tree-channel + .channel-tree-channel {
+    margin-top: 4px;
+}
+
+.channel-tree-topics {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0 0 0 14px;
+    border-left: 1px solid var(--edge);
+}
+
+.channel-tree-name {
+    background: none;
+    border: none;
+    padding: 1px 0;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    text-align: left;
+    display: block;
+    width: 100%;
+}
+
+.channel-tree-name:hover {
+    color: var(--accent);
+}
+
+.channel-tree-name--topic {
+    font-size: 12px;
+    color: var(--node-topic);
+}
+
+/*
+ * --- Copy button ---
+ *
+ * Chrome for `CopyButton.tsx`. The same class names are styled a second time in NODE_APP_CSS
+ * (`DynamicNode.tsx`) because a dynamic node's iframe is a separate document that this stylesheet
+ * deliberately never reaches — keep the two in step.
+ */
+
+.copy-btn {
+    background: none;
+    border: none;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: var(--muted);
+}
+
+.copy-btn:hover {
+    color: var(--ink-secondary);
+    background: var(--panel-raised);
+}
+
+.copy-btn--copied,
+.copy-btn--copied:hover {
+    color: var(--status-healthy);
+    background: none;
+}
+
+.copy-btn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --- Log Viewer --- */
+
+.log-viewer {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--edge);
+    border-top: 1px solid var(--edge);
+    background: var(--bg);
+}
+
+/* Icon-only now that it shares the header with a search field — see LogViewer. */
+.log-resume {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.log-resume:hover {
+    background: var(--edge);
+}
+
+.log-resume svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.log-rows {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.log-row {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 34px;
+    padding: 6px 16px;
+    font-size: 12.5px;
+    border-bottom: 1px solid var(--edge);
+    color: var(--ink-secondary);
+    cursor: pointer;
+    animation: log-row-in 200ms ease-out;
+}
+
+.log-row:hover {
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+@keyframes log-row-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.log-time {
+    width: 60px;
+    flex-shrink: 0;
+    color: var(--muted);
+}
+
+.log-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.log-severity {
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.log-row--ok {
+    background: color-mix(in srgb, var(--status-healthy) 5%, transparent);
+}
+
+.log-row--ok .log-severity {
+    color: var(--status-healthy);
+}
+
+.log-row--warn {
+    background: color-mix(in srgb, var(--status-warning) 5%, transparent);
+}
+
+.log-row--warn .log-severity {
+    color: var(--status-warning);
+}
+
+.log-row--error {
+    background: color-mix(in srgb, var(--status-error) 5%, transparent);
+}
+
+.log-row--error .log-severity {
+    color: var(--status-error);
+}
+
+.log-empty {
+    padding: 16px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.route-id {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -1,0 +1,188 @@
+/**
+ * The grammar of a .idl document — the document itself stays JSON; this describes it.
+ *
+ * Written as a DSL rather than in JSON Schema because the two constraints that matter most here are
+ * the two JSON Schema has no vocabulary for. A type expression nests (array<object<string, Order>>),
+ * which regex cannot match and so `pattern` could only pretend to check; and every type name has to
+ * *resolve* to a declaration elsewhere in the document, which no amount of shape validation can see.
+ * Both are first-class below: the lexicon recurses, and `link`/`declares` resolve names in a scope.
+ *
+ * Two halves, in this order:
+ *   - the document grammar — the JSON structure;
+ *   - the lexicon — the grammar *inside* a string, as a PEG, which is what lets a nested type be
+ *     parsed rather than pattern-matched, and lets an editor know which slot of a half-typed
+ *     `array<` the cursor is in.
+ *
+ * Notation:
+ *   {a: X, b: Y}     a record — the listed keys, and no others
+ *   {[rule]: X}      a map — author-chosen keys, each matching the lexicon rule in brackets
+ *   [X]              a JSON array of X — note the lexicon spends [ ] on its own forms (tuples,
+ *                    enums), which never meet these because those live inside a JSON string
+ *   X?               optional; everything else is required
+ *   X+               one or more (on an array: elements; on a map: entries)
+ *   X | Y            a choice, discriminated by JSON kind — object, string, array or null
+ *   X / Y            PEG ordered choice, inside the lexicon only: first match wins
+ *   text             any JSON string
+ *   link S           an identifier that must name a key declared in scope S
+ *   declares S       on a map: its keys populate scope S, visible to that rule's subtree
+ *
+ * A lexicon rule named in a value position means "a JSON string parsing as this rule" — which is
+ * why `type` may be written directly as a field's type below. Javadoc-style doc blocks are the
+ * documentation an editor surfaces; `//` comments are incidental and carry nothing.
+ */
+grammar messagebus-idl v1
+
+
+// ── Document ────────────────────────────────────────────────────────────────
+
+/** One or more channels. A document may carry a whole namespace's worth. */
+document = [channel+]
+
+/** One channel: the unit a provider claims and clients resolve. */
+channel = {
+    /**
+     * The channel name as it goes on the wire — opaque and dotted by convention
+     * (e.g. Trading.Orders), never parsed.
+     */
+    name: text
+
+    /**
+     * Namespace for generated code; dot-separated segments map to nested folders.
+     * Defaults to the channel name.
+     */
+    namespace?: text
+
+    /**
+     * Complex types this channel's topics refer to. Its keys are the scope every type reference
+     * in this channel resolves against — so two channels may each define a Status.
+     */
+    types?: {[identifier]: typeDefinition} declares types
+
+    /**
+     * The channel's topics. The key names the generated method; the topic's own `name` is what
+     * travels on the wire.
+     */
+    topics: {[identifier]: topic}+
+}
+
+/**
+ * A named type is either a shape — a map of fields — or an alias for any type expression, told
+ * apart by JSON kind rather than by a discriminator field: a shape is an object, an alias a string.
+ *
+ * `type` rather than `enum` so a name may stand for anything the lexicon can express: an enum
+ * (string[Buy|Sell]), a tuple ([string, number]), a collection (array<Order>), or another name.
+ * Enums stop being a special case and become the alias that happened to be wanted first.
+ *
+ * What it costs is a check the grammar cannot make: an alias may name another alias, so a chain may
+ * cycle ("A": "B", "B": "A"). That is the validator's, alongside the one $extends already needs.
+ */
+typeDefinition = fields | type
+
+/**
+ * The shape of a complex type: a flat map of field name to type. Flat because a nested shape is a
+ * type of its own — name it in `types` and reference it.
+ */
+fields = {
+    /**
+     * The parent type. Only fields this type declares are listed here; inherited ones stay on the
+     * parent. Must not cycle.
+     */
+    $extends?: link types
+
+    /** Every other key is a field. */
+    [identifier]: type
+}
+
+/** One topic: a call across the channel, described by what goes in and what comes back. */
+topic = {
+    /** The topic name as it goes on the wire, which need not match the identifier keying it. */
+    name: text
+
+    /**
+     * Parameters, keyed by name — ordered by the generated signature, not by this map.
+     * Empty for a topic that takes nothing.
+     */
+    inbound: {[identifier]: type}
+
+    /**
+     * What the topic answers, or null for fire-and-forget. A non-null `outbound` is what makes
+     * the call request/reply and so correlated.
+     */
+    outbound: type | null
+}
+
+
+// ── Lexicon — the grammar inside a string ───────────────────────────────────
+//
+// `lexicon` below is a section keyword, not a rule: everything after it is a PEG over the
+// characters of a string rather than over JSON, which is a different enough language that telling
+// the two apart by inspecting each rule's shape would be guesswork ([channel+] and [A-Za-z_] both
+// open with a bracket).
+//
+// Ordered choice, and the order is load-bearing three times over. `array` must be tried before
+// `scalar` or the parameterized form would be eaten by the bare `array` keyword. `enum` must be
+// tried before `scalar` for the same reason on both its forms — string[Buy|Sell] and number[0|1]
+// each open with a scalar keyword. And `scalar` must precede `reference` or every keyword would
+// parse as a type name. Swapping any of those pairs changes the language, and quietly: a PEG does
+// not backtrack into an alternative that already succeeded, so the wrong order does not produce an
+// ambiguity error, it produces a shorter parse that fails somewhere else.
+
+lexicon
+
+type = array / map / tuple / enum / scalar / reference
+
+/** A homogeneous collection. Recurses, which is the whole reason this is a grammar. */
+array = "array" "<" type ">"
+
+/**
+ * A fixed-length heterogeneous sequence, e.g. [string, number] — two or more members, since a
+ * one-member tuple is just the type and a zero-member one is nothing.
+ *
+ * The brackets are inside a JSON *string*, so they never collide with the document's own arrays:
+ * "outbound": "[string, number]" is a tuple, "outbound": ["string", "number"] is not a type at all.
+ * Nothing else in the lexicon opens with "[", so it needs no particular place in the choice above.
+ */
+tuple = "[" type ("," type)+ "]"
+
+/**
+ * A keyed collection. Named `map` here but written `object<K, V>`, matching the attic's surface
+ * syntax — the comma is the reason a regex could never split this once V was itself generic.
+ */
+map = "object" "<" type "," type ">"
+
+/**
+ * A leaf with a fixed value set, over either of the two scalars a value set makes sense on:
+ * string[Buy|Sell] names its members, number[0|1|2] gives their values. Which one a contract uses
+ * is a wire decision — the names travel, or the numbers do — so the IDL has to be able to say both.
+ */
+enum = stringEnum / numberEnum
+
+stringEnum = "string" "[" identifier ("|" identifier)* "]"
+
+numberEnum = "number" "[" integer ("|" integer)* "]"
+
+/**
+ * The unparameterized forms, kept from the attic's C# mapping: `object` is a free-form map
+ * (Dictionary<string, object?>) and `array` an untyped collection (List<object?>).
+ */
+scalar = "string" / "number" / "boolean" / "date" / "object" / "array"
+
+/**
+ * The one terminal that is not lexical: it parses as an identifier and then has to *resolve*,
+ * which is why a type expression can only be checked with the document's scopes in hand — not by
+ * a standalone regex, and not by a standalone parser either.
+ *
+ * Resolution may also chain, since what it lands on can be an alias (see typeDefinition) naming a
+ * further type. So a resolver walks rather than looks up once, and needs a cycle guard to do it.
+ */
+reference = link types
+
+/** A key safe to emit as a symbol in any target language, since generated code names things after it. */
+identifier = [A-Za-z_] [A-Za-z0-9_]*
+
+/**
+ * An enum member's value. Signed, because a C# enum's members may be negative and an IDL that
+ * couldn't say so would silently not describe them; integral only, because enum membership is an
+ * equality test and equality on a fractional value is not one worth resting a contract on.
+ */
+integer = "-"? [0-9]+

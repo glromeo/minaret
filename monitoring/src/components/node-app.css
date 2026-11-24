@@ -1,0 +1,454 @@
+﻿:root {
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+.node-app-root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: #11141c;
+    color: #eef1f6;
+    font: 12px/1.5 ui-sans-serif, system-ui, sans-serif;
+}
+
+.node-app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.node-app-header {
+    flex-shrink: 0;
+}
+
+.node-app-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    margin: -10px;
+    padding: 10px;
+}
+
+.node-app-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: #a7b2c4;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.node-app-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5b6779;
+    flex-shrink: 0;
+}
+
+.node-app-dot--open {
+    background: #5bc78e;
+}
+
+.node-app-dot--connecting {
+    background: #e0b95b;
+}
+
+.node-app-dot--closed {
+    background: #e05b5b;
+}
+
+.node-app-error {
+    background: rgba(224, 91, 91, 0.15);
+    color: #e05b5b;
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    word-break: break-word;
+    flex-shrink: 0;
+}
+
+.node-app-waiting {
+    background: rgba(224, 185, 91, 0.12);
+    color: #e0b95b;
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    word-break: break-word;
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.node-app-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #262c39;
+}
+
+.node-app-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #5b6779;
+    padding: 6px 4px;
+    font: inherit;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+}
+
+.node-app-tab:hover {
+    color: #a7b2c4;
+}
+
+.node-app-tab--active {
+    color: #eef1f6;
+    border-bottom-color: #5b8fd6;
+}
+
+.node-app-tab-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.node-app-section {
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.node-app-section--grow {
+    display: flex;
+    flex-direction: column;
+}
+
+.node-app-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #5b6779;
+    margin-bottom: 5px;
+}
+
+.node-app-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.node-app-input, select.node-app-input {
+    flex: 1;
+    min-width: 0;
+    background: #181c26;
+    border: 1px solid #262c39;
+    color: #eef1f6;
+    border-radius: 4px;
+    padding: 5px 7px;
+    font: inherit;
+}
+
+.node-app-textarea {
+    resize: vertical;
+    min-height: 44px;
+    font-family: inherit;
+}
+
+.node-app-button {
+    background: #262c39;
+    border: 1px solid #262c39;
+    color: #eef1f6;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font: inherit;
+    flex-shrink: 0;
+}
+
+.node-app-button:hover {
+    border-color: #5b8fd6;
+}
+
+.node-app-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.node-app-button--connect {
+    background: rgba(91, 199, 142, 0.18);
+    border-color: #5bc78e;
+    color: #5bc78e;
+}
+
+.node-app-button--connect:hover {
+    border-color: #7be0ab;
+}
+
+.node-app-button--create {
+    background: rgba(91, 143, 214, 0.18);
+    border-color: #5b8fd6;
+    color: #5b8fd6;
+}
+
+.node-app-button--create:hover {
+    border-color: #82aee0;
+}
+
+.node-app-spinner {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #5b6779;
+    border-top-color: #eef1f6;
+    border-radius: 50%;
+    animation: node-app-spin 0.6s linear infinite;
+}
+
+@keyframes node-app-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.node-app-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.node-app-chip {
+    background: rgba(91, 143, 214, 0.18);
+    color: #5b8fd6;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.node-app-chip:hover {
+    border-color: #5b8fd6;
+}
+
+.node-app-chip--selected {
+    background: #5b8fd6;
+    color: #10131a;
+}
+
+.node-app-log {
+    overflow-y: auto;
+}
+
+.node-app-log--compact {
+    max-height: 100px;
+    border: 1px solid #262c39;
+    border-radius: 4px;
+}
+
+.node-app-empty {
+    color: #5b6779;
+    font-size: 11px;
+}
+
+.node-app-log-row {
+    padding: 2px 6px;
+    border-bottom: 1px solid #1c212c;
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+}
+
+.node-app-log-body {
+    color: #a7b2c4;
+    word-break: break-all;
+}
+
+.node-app-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.node-app-acc-item {
+    border: 1px solid #262c39;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.node-app-acc-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: #181c26;
+    cursor: pointer;
+}
+
+.node-app-acc-caret {
+    color: #5b6779;
+    line-height: 0;
+    width: 15px;
+    scale: 1.5;
+    flex-shrink: 0;
+}
+
+.node-app-acc-title {
+    flex: 1;
+    font-weight: 600;
+}
+
+.node-app-role-tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 999px;
+    color: #a7b2c4;
+    background: rgba(167, 178, 196, 0.12);
+}
+
+.node-app-role-tag--provider {
+    color: #5b8fd6;
+    background: rgba(91, 143, 214, 0.18);
+}
+
+.node-app-role-tag--client {
+    color: #5bc78e;
+    background: rgba(91, 199, 142, 0.18);
+}
+
+.node-app-acc-body {
+    padding: 8px;
+    border-top: 1px solid #262c39;
+}
+
+.node-app-icon-btn {
+    background: none;
+    border: none;
+    padding: 3px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.node-app-icon-btn:hover {
+    background: rgba(224, 91, 91, 0.15);
+}
+
+.node-app-icon-btn--danger:hover .node-app-icon-trash {
+    border-color: #e05b5b;
+}
+
+.node-app-icon-btn--danger:hover .node-app-icon-trash::before {
+    background: #e05b5b;
+}
+
+.node-app-icon-btn .node-app-spinner {
+    display: none;
+}
+
+.node-app-icon-btn--pending .node-app-icon-trash {
+    display: none;
+}
+
+.node-app-icon-btn--pending .node-app-spinner {
+    display: inline-block;
+}
+
+.node-app-icon-btn--pending:hover .node-app-icon-trash {
+    display: block;
+}
+
+.node-app-icon-btn--pending:hover .node-app-spinner {
+    display: none;
+}
+
+.node-app-icon-trash {
+    position: relative;
+    display: block;
+    width: 9px;
+    height: 9px;
+    border: 1.5px solid #a7b2c4;
+    border-top: none;
+    border-radius: 0 0 1px 1px;
+}
+
+.node-app-icon-trash::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -2px;
+    right: -2px;
+    height: 1.5px;
+    background: #a7b2c4;
+}
+
+/* CopyButton chrome — the host's styles.css defines the same classes for the outer document
+   and never reaches in here, so the two have to be kept in step. */
+.copy-btn {
+    background: none;
+    border: none;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: #5b6779;
+}
+
+.copy-btn:hover {
+    color: #a7b2c4;
+    background: #181c26;
+}
+
+.copy-btn--copied, .copy-btn--copied:hover {
+    color: #5bc78e;
+    background: none;
+}
+
+.copy-btn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.route-id {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

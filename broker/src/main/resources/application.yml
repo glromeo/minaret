@@ -1,0 +1,32 @@
+# Relative paths resolve against the working directory, which is broker/ when run from the IDE (see
+# CLAUDE.md).
+micronaut:
+  application:
+    name: broker
+  server:
+    # HTTPS only. There is no plain-HTTP listener.
+    ssl:
+      enabled: true
+      port: 5443
+      key-store:
+        # A locally trusted localhost certificate in broker/ (gitignored); see CLAUDE.md "Dev certificate".
+        path: file:devcert.pfx
+        password: ${MESSAGEBUS_CERT_PASSWORD:messagebus}
+        type: PKCS12
+  router:
+    static-resources:
+      # broker/wwwroot: the tracked landing page, plus monitoring's build under monitor/.
+      default:
+        enabled: true
+        mapping: /**
+        paths: file:wwwroot
+  serde:
+    serialization:
+      # Null members are written, so acks carry every field and read the same as the C# Broker's.
+      inclusion: always
+
+messagebus:
+  realm: Default
+  idl:
+    # The directory the IDL repository keeps .idl documents in (gitignored scratch for development).
+    path: idl

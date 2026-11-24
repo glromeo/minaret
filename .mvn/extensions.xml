@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Registers the YAML POM reader, which is what lets every module here be described by pom.yml instead
+  of pom.xml. Must be an XML file: Maven itself reads it before any model parser exists, so it is the
+  one build file that cannot be YAML. Maven finds it by walking up to this directory, so it covers
+  every module and running Maven from inside one.
+
+  Pinned to polyglot-yaml 0.8.2, the newest release. It is built against the Maven 3.9 plugin API and
+  does not load on Maven 4 at all (4.x is not GA either), so the build targets Maven 3.9.
+-->
+<extensions>
+  <extension>
+    <groupId>io.takari.polyglot</groupId>
+    <artifactId>polyglot-yaml</artifactId>
+    <version>0.8.2</version>
+  </extension>
+</extensions>

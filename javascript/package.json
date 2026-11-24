@@ -1,0 +1,41 @@
+{
+  "name": "@messagebus/client",
+  "version": "0.1.0",
+  "description": "MessageBus client runtime for Node and the browser — the JavaScript port of the C# Runtime",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./discovery": {
+      "types": "./src/discovery/broker-discovery.d.ts",
+      "browser": "./src/discovery/broker-discovery.browser.js",
+      "default": "./src/discovery/broker-discovery.js"
+    },
+    "./messaging/*": {
+      "types": "./src/messaging/*.d.ts",
+      "default": "./src/messaging/*.js"
+    },
+    "./utils/*": {
+      "types": "./src/utils/*.d.ts",
+      "default": "./src/utils/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "browser": {
+    "./src/discovery/broker-discovery.js": "./src/discovery/broker-discovery.browser.js"
+  }
+}

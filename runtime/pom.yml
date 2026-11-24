@@ -1,0 +1,29 @@
+modelVersion: 4.0.0
+
+parent:
+  groupId: io.minaret
+  artifactId: minaret
+  version: 0.1.0-SNAPSHOT
+  relativePath: ../pom.yml
+
+artifactId: runtime
+packaging: jar
+
+name: "Minaret :: Runtime"
+description: >
+  The Java client runtime: broker discovery, the router, channels and topics, the annotated surface,
+  and the M01 wire codec.
+
+dependencies:
+  # The only runtime dependency. UUID, Base64, gzip, WebSocket and named pipes are all in the JDK.
+  - groupId: com.fasterxml.jackson.core
+    artifactId: jackson-databind
+
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+
+build:
+  plugins:
+    - artifactId: maven-compiler-plugin
+    - artifactId: maven-surefire-plugin
